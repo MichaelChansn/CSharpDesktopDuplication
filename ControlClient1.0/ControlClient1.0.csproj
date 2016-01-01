@@ -39,7 +39,7 @@
   <ItemGroup>
     <Reference Include="Simplicit.Net.Lzo, Version=1.0.0.0, Culture=neutral">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\ControlServer1.0\bin\Debug\Simplicit.Net.Lzo.dll</HintPath>
+      <HintPath>libs\Simplicit.Net.Lzo.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
