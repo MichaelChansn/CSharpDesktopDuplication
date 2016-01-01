@@ -1,0 +1,168 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{EDA2817F-F7FB-4535-8E12-89300E6EAA6C}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ImageComparer</RootNamespace>
+    <AssemblyName>ImageComparer</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="LZ4Sharp, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\LZ4Sharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Simplicit.Net.Lzo">
+      <HintPath>..\ControlServer1.0\bin\Debug\Simplicit.Net.Lzo.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BlockQueue.cs" />
+    <Compile Include="Core\ImageComparer.cs" />
+    <Compile Include="Form1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form1.Designer.cs">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ICSharpCode.SharpZLib\BZip2\BZip2.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\BZip2\BZip2Constants.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\BZip2\BZip2Exception.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\BZip2\BZip2InputStream.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\BZip2\BZip2OutputStream.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Checksums\Adler32.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Checksums\CRC32.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Checksums\IChecksum.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Checksums\StrangeCRC.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Core\FileSystemScanner.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Core\INameTransform.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Core\IScanFilter.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Core\NameFilter.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Core\PathFilter.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Core\StreamUtils.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Core\WindowsPathUtils.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Encryption\PkzipClassic.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\GZip\GZIPConstants.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\GZip\GZipException.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\GZip\GzipInputStream.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\GZip\GzipOutputStream.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Main.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\SharpZipBaseException.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Tar\InvalidHeaderException.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Tar\TarArchive.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Tar\TarBuffer.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Tar\TarEntry.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Tar\TarException.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Tar\TarHeader.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Tar\TarInputStream.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Tar\TarOutputStream.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\Compression\Deflater.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\Compression\DeflaterConstants.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\Compression\DeflaterEngine.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\Compression\DeflaterHuffman.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\Compression\DeflaterPending.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\Compression\Inflater.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\Compression\InflaterDynHeader.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\Compression\InflaterHuffmanTree.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\Compression\PendingBuffer.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\Compression\Streams\DeflaterOutputStream.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\Compression\Streams\InflaterInputStream.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\Compression\Streams\OutputWindow.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\Compression\Streams\StreamManipulator.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\FastZip.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\IEntryFactory.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\WindowsNameTransform.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\ZipConstants.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\ZipEntry.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\ZipEntryFactory.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\ZipException.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\ZipExtraData.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\ZipFile.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\ZipHelperStream.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\ZipInputStream.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\ZipNameTransform.cs" />
+    <Compile Include="ICSharpCode.SharpZLib\Zip\ZipOutputStream.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="app.config" />
+    <None Include="ICSharpCode.SharpZLib\ICSharpCode.SharpZLib.prjx" />
+    <None Include="ICSharpCode.SharpZLib\obj\Debug\ResolveAssemblyReference.cache" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ICSharpCode.SharpZLib\ICSharpCode.SharpZLib.csproj" />
+    <Content Include="ICSharpCode.SharpZLib\ICSharpCode.SharpZLib.csproj.user" />
+    <Content Include="ICSharpCode.SharpZLib\obj\Debug\ICSharpCode.SharpZipLib.dll" />
+    <Content Include="ICSharpCode.SharpZLib\obj\Debug\ICSharpCode.SharpZipLib.pdb" />
+    <Content Include="ICSharpCode.SharpZLib\obj\ICSharpCode.SharpZLib.csproj.FileListAbsolute.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ICSharpCode.SharpZLib\obj\Debug\TempPE\" />
+    <Folder Include="ICSharpCode.SharpZLib\obj\Release\TempPE\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
