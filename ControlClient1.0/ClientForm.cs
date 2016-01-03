@@ -181,12 +181,14 @@ namespace ControlClient1._0
                     short difNum = reader.ReadInt16();
                     if (difNum > 0)
                     {
-                        List<ShortPoint> difPoints = new List<ShortPoint>();
+                        List<ShortRec> difPoints = new List<ShortRec>();
                         for (int i = 0; i < difNum; i++)
                         {
                             short xpoint = reader.ReadInt16();
                             short ypoint = reader.ReadInt16();
-                            ShortPoint difPoint = new ShortPoint(xpoint, ypoint);
+                            short width = reader.ReadInt16();
+                            short height = reader.ReadInt16();
+                            ShortRec difPoint = new ShortRec(xpoint, ypoint,width,height);
                             difPoints.Add(difPoint);
 
                         }
@@ -257,8 +259,8 @@ namespace ControlClient1._0
                     //Console.WriteLine(dataBytes.Length);
 
                     byte[] getByte=new LZOCompressor().Decompress(dataBytes);
-                    difbitWithCur.setDifBitmap(new Bitmap(new MemoryStream(getByte), true));
-
+                    Bitmap temp = (Bitmap)Bitmap.FromStream(new MemoryStream(getByte));
+                    difbitWithCur.setDifBitmap(temp);
                     /*
                     FileStream fs = File.OpenWrite("D:\\clientZip.zip");
                     fs.Write(dataBytes,0,dataBytes.Length);
@@ -312,15 +314,15 @@ namespace ControlClient1._0
                     RecPacket.BitmapType type=difbitWithCur.getBitmapType();
                     ShortPoint cursorpoint = difbitWithCur.getCursorPoint();
                     Bitmap btm=difbitWithCur.getDifBitmap();
-                    List<ShortPoint> difPoints = difbitWithCur.getDifPointsList();
+                    List<ShortRec> difPoints = difbitWithCur.getDifPointsList();
                     switch (type)
                     {
                         case RecPacket.BitmapType.BLOCK:
-                            // Stopwatch sw = new Stopwatch();
-                             //   sw.Start();
+                            Stopwatch sw = new Stopwatch();
+                            sw.Start();
                             Bitmap recBitmap = RecoverBitmap.recoverScreenBitmap(difPoints, globalCompareBitmap, btm, bitCmpSize);
-                            // sw.Stop();
-                             //   Console.WriteLine("client:"+sw.ElapsedMilliseconds+"ms");
+                            sw.Stop();
+                            Console.WriteLine("client:"+sw.ElapsedMilliseconds+"ms");
                             bitmapWithCursor.setCursorPoint(cursorpoint);
                             bitmapWithCursor.setScreenBitmap(recBitmap);
                             globalCompareBitmap = (Bitmap)recBitmap.Clone();

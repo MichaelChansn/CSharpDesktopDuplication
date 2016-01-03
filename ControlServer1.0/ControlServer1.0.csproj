@@ -163,6 +163,7 @@
     <Compile Include="ScreenBitmap\DifferentBitmapWithCursor.cs" />
     <Compile Include="ScreenBitmap\ShortPoint.cs" />
     <Compile Include="DataPacket\SendPacket.cs" />
+    <Compile Include="ScreenBitmap\ShortRec.cs" />
     <Compile Include="ServerForm.cs">
       <SubType>Form</SubType>
     </Compile>

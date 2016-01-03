@@ -34,7 +34,7 @@ namespace ControlServer1._0.CopyScreenAndBitmapTools
             try
             {
 
-                Bitmap btm = new Bitmap(screenSize.Width, screenSize.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                Bitmap btm = new Bitmap(screenSize.Width, screenSize.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
                 Graphics g1 = Graphics.FromImage(btm);
                 g1.CopyFromScreen(0, 0, 0, 0, screenSize);//得到屏幕截图
                 int pointx = System.Windows.Forms.Cursor.Position.X;
@@ -67,7 +67,7 @@ namespace ControlServer1._0.CopyScreenAndBitmapTools
            
             try
             {
-                Bitmap btm = new Bitmap(screenSize.Width, screenSize.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                Bitmap btm = new Bitmap(screenSize.Width, screenSize.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
                 Graphics g1 = Graphics.FromImage(btm);
                 g1.CopyFromScreen(0, 0, 0, 0, screenSize);//得到屏幕截图
                 g1.Dispose();

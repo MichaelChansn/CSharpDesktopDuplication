@@ -91,7 +91,7 @@ namespace ControlServer1._0.BitmapComparer
         }
 
         /**根据开始点的坐标，扣取不同的图形块*/
-        public static Bitmap getBlocksIn1BitmapClone(List<ShortPoint> difPoints, Bitmap fromBtmOrl, Size block)
+        public static Bitmap getBlocksIn1BitmapClone(List<ShortRec> difPoints, Bitmap fromBtmOrl, Size block)
         {
             Bitmap fromBtm = (Bitmap)fromBtmOrl.Clone();//克隆一份，保证不冲突访问
             Bitmap ret2 = new Bitmap(fromBtmOrl.Width, fromBtmOrl.Height, fromBtm.PixelFormat);
@@ -100,12 +100,12 @@ namespace ControlServer1._0.BitmapComparer
 
 
             Graphics g = Graphics.FromImage(ret2);
-            foreach (ShortPoint difPoint in difPoints)
+            foreach (ShortRec difPoint in difPoints)
             {
-                int startX = difPoint.getXPoint();
-                int startY = difPoint.getYPoint();
-                int width = fromBtm.Width - startX > block.Width ? block.Width : fromBtm.Width - startX;
-                int height = fromBtm.Height - startY > block.Height ? block.Height : fromBtm.Height - startY;
+                int startX = difPoint.xPoint;
+                int startY = difPoint.yPoint;
+                int width = difPoint.width;
+                int height = difPoint.height;
                 Bitmap temp=fromBtm.Clone(new Rectangle(startX, startY, width, height), fromBtm.PixelFormat);
                 g.DrawImage(temp, startX, startY);
                 temp.Dispose();

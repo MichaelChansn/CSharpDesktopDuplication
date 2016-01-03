@@ -12,7 +12,7 @@ namespace ControlClient1._0.ScreenBitmap
     {
         private Bitmap difBitmap;
         private ShortPoint cursorPoint;
-        private List<ShortPoint> difPointsList;
+        private List<ShortRec> difPointsList;
         private RecPacket.BitmapType type;
 
         public Bitmap getDifBitmap()
@@ -31,11 +31,11 @@ namespace ControlClient1._0.ScreenBitmap
         {
             this.cursorPoint = cursorPoint;
         }
-        public List<ShortPoint> getDifPointsList()
+        public List<ShortRec> getDifPointsList()
         {
             return this.difPointsList;
         }
-        public void setDifPointsList(List<ShortPoint> difPointsList)
+        public void setDifPointsList(List<ShortRec> difPointsList)
         {
             this.difPointsList = difPointsList;
         }

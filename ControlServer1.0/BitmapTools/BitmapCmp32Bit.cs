@@ -28,7 +28,7 @@ namespace ControlServer1._0.BitmapTools
             public byte A;
         }
         private static int BOTTOMLINE = 12;//颜色阀值，低于此值认为是相同的像素
-        private static int SCANSTRIDE = 3;//隔行扫描，每隔3行/列，扫描一次
+        private static int SCANSTRIDE =3;//隔行扫描，每隔3行/列，扫描一次
 
         /// <summary>
         /// 比较两个图像
@@ -38,9 +38,9 @@ namespace ControlServer1._0.BitmapTools
         /// <param name="block"></param>
         /// <returns></returns>
         /// 
-        public static List<ShortPoint> CompareS(Rectangle[] dirtyRecs, Bitmap globalBtm, Bitmap lastFrame, Size block)
+        public static List<ShortRec> CompareS(Rectangle[] dirtyRecs, Bitmap globalBtm, Bitmap lastFrame, Size block)
         {
-            List<ShortPoint> difPoint = new List<ShortPoint>();
+            List<ShortRec> difPoint = new List<ShortRec>();
             PixelFormat pf = PixelFormat.Format32bppArgb;
             Bitmap retBtm = new Bitmap(lastFrame.Width, lastFrame.Height, lastFrame.PixelFormat);
             Graphics g = Graphics.FromImage(retBtm);
@@ -91,13 +91,17 @@ namespace ControlServer1._0.BitmapTools
                                         //忽略A值
                                         if (Math.Abs(pc1->R - pc2->R) > BOTTOMLINE || Math.Abs(pc1->G - pc2->G) > BOTTOMLINE || Math.Abs(pc1->B - pc2->B) > BOTTOMLINE)
                                         {
-
-                                            difPoint.Add(new ShortPoint(w, h));
+                                            int bw = Math.Min(block.Width, endX - w);
+                                            int bh = Math.Min(block.Height, endY - h);
+                                            difPoint.Add(new ShortRec(w, h,bw,bh));
+                                            
                                             //可以继续使用clone()
                                             //bmp1.Clone(new Rectangle(w, h, 19, 19), bmp1.PixelFormat).Save("D:\\test.jpeg", ImageFormat.Jpeg);
                                             goto E;
                                         }
+                                        //SCANSTRIDE = (j & 3) + 1;
                                     }
+                                    //SCANSTRIDE = 3 - (i % 3);
                                 }
                             E:
                                 w += block.Width;

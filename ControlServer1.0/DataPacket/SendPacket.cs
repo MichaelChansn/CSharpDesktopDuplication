@@ -46,7 +46,7 @@ namespace ControlServer1._0.DataPacket
         /**鼠标的坐标*/
         private ShortPoint cursorPoint=null;
         /**差异图形的起点坐标*/
-        private List<ShortPoint> difPointsList=null;
+        private List<ShortRec> difPointsList=null;
         /**要发送的图形数据*/
         private byte[] bitmapBytes = null;
 
@@ -86,11 +86,11 @@ namespace ControlServer1._0.DataPacket
         }
 
 
-        public List<ShortPoint> getDifPointsList()
+        public List<ShortRec> getDifPointsList()
         {
             return this.difPointsList;
         }
-        public void setDifPointsList(List<ShortPoint> difPointsList)
+        public void setDifPointsList(List<ShortRec> difPointsList)
         {
             this.difPointsList = difPointsList;
         }

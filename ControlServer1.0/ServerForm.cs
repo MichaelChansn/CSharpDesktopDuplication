@@ -223,7 +223,7 @@ namespace ControlServer1._0
                        writer.Write((byte)sendpacket.getBitmapType());
                        writer.Write((Int16)sendpacket.getCursorPoint().getXPoint());
                        writer.Write((Int16)sendpacket.getCursorPoint().getYPoint());
-                       List<ShortPoint> difPointsList = sendpacket.getDifPointsList();
+                       List<ShortRec> difPointsList = sendpacket.getDifPointsList();
                        Int16 difNum = 0;
                        if (difPointsList != null)
                        {
@@ -233,11 +233,13 @@ namespace ControlServer1._0
                        
                        if (difNum > 0)
                        {
-                           List<ShortPoint> difPoints = sendpacket.getDifPointsList();
-                           foreach (ShortPoint dif in difPoints)
+                           List<ShortRec> difPoints = sendpacket.getDifPointsList();
+                           foreach (ShortRec dif in difPoints)
                            {
-                               writer.Write(dif.getXPoint());
-                               writer.Write(dif.getYPoint());
+                               writer.Write(dif.xPoint);
+                               writer.Write(dif.yPoint);
+                               writer.Write(dif.width);
+                               writer.Write(dif.height);
                            }
                        }
                        writer.Write(sendpacket.getBitByts(), 0, sendpacket.getbitmapBytesLength());
@@ -269,7 +271,7 @@ namespace ControlServer1._0
         /**根据屏幕变化的率的大小，动态的调整截屏间隔，优化流量和流畅度。
          * 最小100，最大950;
          */
-        private static int dynamicTime = 80;
+        private static int dynamicTime = 90;
         private void copyScreenToBlockingQueue()
         {
             //使用while，防止线程的伪唤醒
@@ -369,13 +371,13 @@ namespace ControlServer1._0
                 BitmapWithCursor bitmapWithCursor=screenCopyQueue.Dequeue();
                 if (bitmapWithCursor != null)
                 {
-                   // textBoxCopy.Text = "copy队列：" + screenCopyQueue.queue.Count;
-                    keyFrameAdjusttimes++;
-                    if (keyFrameAdjusttimes > 300)
-                    {
-                        keyFrameAdjusttimes = 0;
-                        sendKeyFrame();
-                    }
+                    //发送关键帧，校准
+                    //keyFrameAdjusttimes++;
+                    //if (keyFrameAdjusttimes > 300)
+                    //{
+                    //    keyFrameAdjusttimes = 0;
+                    //    sendKeyFrame();
+                    //}
                     Bitmap btm1 = bitmapWithCursor.getScreenBitmap();
                     if (isFirstFrame)
                     {
@@ -385,7 +387,7 @@ namespace ControlServer1._0
                     else
                     {
                         Bitmap btm2 = globalComparerBitmap;
-                        List<ShortPoint> difPoints = BitmapCmp32Bit.CompareS(bitmapWithCursor.dirtyRecs, btm2, btm1,bitCmpSize);//BitmapCmp24Bit.CompareS(btm1, btm2, bitCmpSize);
+                        List<ShortRec> difPoints = BitmapCmp32Bit.CompareS(bitmapWithCursor.dirtyRecs, btm2, btm1,bitCmpSize);//BitmapCmp24Bit.CompareS(btm1, btm2, bitCmpSize);
                         Bitmap sendPic = null;
                         if (difPoints.Count > 0)
                         {
@@ -399,11 +401,11 @@ namespace ControlServer1._0
                             }
                             else 
                             {
-                               // Stopwatch sw = new Stopwatch();
-                               // sw.Start();
+                               Stopwatch sw = new Stopwatch();
+                                sw.Start();
                                 sendPic = GetDifBlocks.getBlocksIn1BitmapClone(difPoints, btm1, bitCmpSize);
-                               // sw.Stop();
-                               // Console.WriteLine(sw.ElapsedMilliseconds+"ms");
+                                sw.Stop();
+                                Console.WriteLine(sw.ElapsedMilliseconds+"ms");
                                 differentBitmapWithCursor.setBitmapType(SendPacket.BitmapType.BLOCK);
                                 differentBitmapWithCursor.setDifPointsList(difPoints);
                                

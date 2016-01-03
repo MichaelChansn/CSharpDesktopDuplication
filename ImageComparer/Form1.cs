@@ -13,7 +13,7 @@ using System.IO.Compression;
 using ICSharpCode.SharpZipLib.Zip;
 using ImageComparer;
 using Simplicit.Net.Lzo;
-using LZ4Sharp;
+//using LZ4Sharp;
 
 namespace ComparerTest
 {
@@ -285,17 +285,23 @@ namespace ComparerTest
             test.IsBackground = true;
             test.Start();*/
             Bitmap btm1 = getScreenPic();
+            MemoryStream ms = new MemoryStream();
+            btm1.Save(ms, ImageFormat.Jpeg);
+           // Bitmap btm3 =(Bitmap)Bitmap.FromStream(ms);
+            Bitmap btm3 = new Bitmap(1920, 1080, PixelFormat.Format24bppRgb);
             Bitmap btm2 = null;
            
             Stopwatch watch = new Stopwatch();
             watch.Start();
             for (int i = 1000; i > 0; i--)
             {
-                btm2 = (Bitmap)btm1.Clone(new RectangleF(0, 0, btm1.Width, btm1.Height), PixelFormat.Format32bppArgb);
-               // btm2 = new Bitmap(800, 800);               
+               BitmapData bd= btm1.LockBits(new Rectangle(0, 0, btm1.Width, btm1.Height),ImageLockMode.ReadOnly,PixelFormat.Format24bppRgb);
+                //btm2 = (Bitmap)btm3.Clone(new Rectangle(0, 0, btm1.Width, btm1.Height), PixelFormat.Format24bppRgb);
+               // btm2 = new Bitmap(btm1.Width, btm1.Height);               
                //btm2= Core.ImageComparer.getBlockBitmap(new Rectangle(0, 0, 800, 800), btm1);
                //btm2.Save("D:\\test" +i+ ".jpg", ImageFormat.Jpeg);
-                btm2.Dispose();
+                //btm2.Dispose();
+               btm1.UnlockBits(bd);
             }
             //btm2 = Core.ImageComparer.getBlockBitmap(new Rectangle(0, 0, 800, 800), btm1);
             watch.Stop();
