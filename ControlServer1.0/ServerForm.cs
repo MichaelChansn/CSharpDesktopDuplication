@@ -244,14 +244,6 @@ namespace ControlServer1._0
                        }
                        writer.Write(sendpacket.getBitByts(), 0, sendpacket.getbitmapBytesLength());
                        writer.Flush();
-                       /*
-                       FileStream fs = File.OpenWrite("D:\\serverZip.zip");
-                       fs.Write(sendpacket.getBitByts(), 0, sendpacket.getbitmapBytesLength());
-                       fs.Close();
-                       */
-
-
-                      // MessageBox.Show(sendpacket.getbitmapBytesLength() + "");
 
                    }
                    catch (Exception ex)
@@ -269,7 +261,7 @@ namespace ControlServer1._0
         ManualResetEvent manualEvent = new ManualResetEvent(false);
        
         /**根据屏幕变化的率的大小，动态的调整截屏间隔，优化流量和流畅度。
-         * 最小100，最大950;
+         * 最小50，最大950;
          */
         private static int dynamicTime = 90;
         private void copyScreenToBlockingQueue()
@@ -300,13 +292,21 @@ namespace ControlServer1._0
             Stopwatch sw = new Stopwatch();
             sw.Start();
             int fps = 0;//统计FPS
+            bool nullFrame = true;
             while (isSendPic)
             {
                 
                 Thread.Sleep(dynamicTime);
                 DesktopFrame frame = CopyScreen.getScreenPicDXGI();
+
                 if (frame != null)
                 {
+                    if (nullFrame)
+                    {
+                        //第一针总是黑屏，所以直接舍弃
+                        nullFrame = false;
+                        continue;
+                    }
                     fps++;
                     BitmapWithCursor bitmapWithCursor = new BitmapWithCursor();
                     bitmapWithCursor.setCursorPoint(new ShortPoint(System.Windows.Forms.Cursor.Position.X,System.Windows.Forms.Cursor.Position.Y));
@@ -495,16 +495,6 @@ namespace ControlServer1._0
 
 
 
-
-
-
-
-
-
-
-
-
-
         private Bitmap BytesToBitmap(byte[] Bytes)
         {
             MemoryStream stream = new MemoryStream(Bytes);
@@ -545,23 +535,6 @@ namespace ControlServer1._0
             }
          }
 
-       
-        private void buttonLocalTest_Click(object sender, EventArgs e)
-        {
-
-            Tests.testALot(textBoxInfoShow,pictureBoxSender);
-            
-        }
-
-        private void buttonBitBltTest_Click(object sender, EventArgs e)
-        {
-            Tests.testBitBlt(textBoxInfoShow, pictureBoxSender);
-        }
-
-        private void buttonAverageTest_Click(object sender, EventArgs e)
-        {
-            Tests.testaverageExpend(textBoxInfoShow, pictureBoxSender);
-        }
 
         private void timer1_Tick(object sender, EventArgs e)
         {

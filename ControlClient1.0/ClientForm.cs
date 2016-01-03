@@ -198,14 +198,10 @@ namespace ControlClient1._0
                     /*
                     int size = 0;
                     byte[] getBitmapBytes = new byte[bitmapBytesLen];
-                    reader.ReadByte();
-                    reader.ReadByte();
-                    while (size < (bitmapBytesLen-2))
+                    while (size < bitmapBytesLen)
                     {
                         size += reader.Read(getBitmapBytes, size, (bitmapBytesLen-2) - size);
-                    }
-                    getBitmapBytes[bitmapBytesLen - 2] = 0x00;
-                    getBitmapBytes[bitmapBytesLen - 1] = 0x00;*/
+                    }*/
                     byte[] getBitmapBytes = reader.ReadBytes(bitmapBytesLen);
 
                     /**组装数据*/
@@ -299,9 +295,10 @@ namespace ControlClient1._0
         * 块越小，扫描速度就越慢，但是发送的数据量就小；
         * 局域网一般100*100
         * 广域网一般40*40 或 20*20
-        * 是否需要协商块的大小？？？？进一步实验决定。默认的事30*30
+        * 是否需要协商块的大小？？？？进一步实验决定。默认的事30*30,
+         * 现在已经完全由server决定，client不需要blocksize
         **/
-        private static Size bitCmpSize = new Size(30, 30);
+        //private static Size bitCmpSize = new Size(30, 30);
         /**图形恢复函数*/
         private void recoverBitmapFun()
         {
@@ -320,7 +317,7 @@ namespace ControlClient1._0
                         case RecPacket.BitmapType.BLOCK:
                             Stopwatch sw = new Stopwatch();
                             sw.Start();
-                            Bitmap recBitmap = RecoverBitmap.recoverScreenBitmap(difPoints, globalCompareBitmap, btm, bitCmpSize);
+                            Bitmap recBitmap = RecoverBitmap.recoverScreenBitmap(difPoints, globalCompareBitmap, btm/*, bitCmpSize*/);
                             sw.Stop();
                             Console.WriteLine("client:"+sw.ElapsedMilliseconds+"ms");
                             bitmapWithCursor.setCursorPoint(cursorpoint);
@@ -378,7 +375,6 @@ namespace ControlClient1._0
                         g.Dispose();
                     }
                     pictureBoxRec.BackgroundImage = display;
-                   // display.Save("D:\\test.png", ImageFormat.Png);
                     labeldispalyQueue.Text = "显示队列大小：" + screenCopyQueue.queue.Count + "\r\n";
                 }
                
@@ -387,12 +383,6 @@ namespace ControlClient1._0
         }
 
 
-      
-        private void timerFps_Tick(object sender, EventArgs e)
-        {
-           // labelFps.Text = fps + "fps\r\n"+labelFps.Text;
-            
-        }
 
         private void timerGC_Tick(object sender, EventArgs e)
         {

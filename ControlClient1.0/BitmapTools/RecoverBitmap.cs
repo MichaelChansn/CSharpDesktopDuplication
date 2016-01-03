@@ -29,11 +29,10 @@ namespace ControlClient1._0.BitmapTools
 
 
         /**根据开始点的坐标，扣取不同的图形块*/
-        public static Bitmap recoverScreenBitmap(List<ShortRec> difPoints, Bitmap globalBtm, Bitmap difBtm, Size block)
+        public static Bitmap recoverScreenBitmap(List<ShortRec> difPoints, Bitmap globalBtm, Bitmap difBtm/*, Size block*/)
         {
             Bitmap toBtm = (Bitmap)globalBtm.Clone();//克隆一份，保证不冲突访问
-
-            PixelFormat pf = PixelFormat.Format24bppRgb;
+            PixelFormat pf = PixelFormat.Format24bppRgb;//因为经过fpeg压缩就变成了24位图像，而且是DIB，效率比较低，必须集中处理
             BitmapData bd1 = difBtm.LockBits(new Rectangle(0, 0, difBtm.Width, difBtm.Height), ImageLockMode.ReadOnly, pf);
             BitmapData bd2 = toBtm.LockBits(new Rectangle(0, 0, toBtm.Width, toBtm.Height), ImageLockMode.WriteOnly, pf);
 
@@ -103,7 +102,7 @@ namespace ControlClient1._0.BitmapTools
                 int startY = difPoint.getYPoint();
                 int width = difBtm.Width - startX > block.Width ? block.Width : difBtm.Width - startX;
                 int height = difBtm.Height - startY > block.Height ? block.Height : difBtm.Height - startY;
-                Stopwatch sw = new Stopwatch();//为什么采用和服务端一样的draw会使用10ms，实在是太慢了，服务端所有扫描一共才10ms不到
+                Stopwatch sw = new Stopwatch();//为什么采用和服务端一样的draw会使用10ms，实在是太慢了，服务端所有扫描一共才10ms不到，因为DIB
                 sw.Start();
                 //奇怪，直接clone()耗时0ms，但是clone(rec,pixel)耗时10ms
                 Bitmap temp = difBtm.Clone(new Rectangle(startX, startY, width, height), difBtm.PixelFormat);//10ms????why???
