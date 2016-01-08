@@ -13,6 +13,8 @@ using System.IO.Compression;
 using ICSharpCode.SharpZipLib.Zip;
 using ImageComparer;
 using Simplicit.Net.Lzo;
+using System.Drawing.Drawing2D;
+using LZ4Sharp;
 //using LZ4Sharp;
 
 namespace ComparerTest
@@ -217,12 +219,12 @@ namespace ComparerTest
            // MessageBox.Show("耗时：" + watch.ElapsedMilliseconds);
            //MessageBox.Show("耗时：" + watch.ElapsedMilliseconds + "压缩前大小：" + ms.ToArray().Length + "Izip:" + msIzip.ToArray().Length+"Iunzip:"+msUnzip.ToArray().Length);
           //  MessageBox.Show(Encoding.ASCII.GetBytes("KS").Length+"");
-            /*
+            
             Bitmap btm1 = getScreenPic();
             Thread.Sleep(3000);
              Bitmap btm2 = getScreenPic();
              List<Rectangle> difpoints = Core.ImageComparer.Compare(btm1, btm2);
-             Bitmap getDifBitmap = Core.ImageComparer.getBlocksIn1Bitmap(difpoints, btm2, btm1, new Size(10, 10));
+             Bitmap getDifBitmap = Core.ImageComparer.getBlocksIn1Bitmap(difpoints,btm2, new Size(10, 10));
              getDifBitmap.Save("D:\\test.jpeg", ImageFormat.Jpeg);
             MemoryStream ms = new MemoryStream();
             getDifBitmap.Save(ms, ImageFormat.Jpeg);
@@ -241,11 +243,11 @@ namespace ComparerTest
             long time1 = watch.ElapsedMilliseconds;
             watch.Reset();
             watch.Start();
-            byte[] reByte2 = (new LZ4Compressor64()).Compress(ms.ToArray());
+            byte[] reByte2 = (LZ4CompressorFactory.CreateNew()).Compress(ms.ToArray());
             watch.Stop();
             long time2 = watch.ElapsedMilliseconds;
-            MessageBox.Show("压缩前jpeg大小：" + ms.ToArray().Length + "zip:" + msIzip.ToArray().Length + "lzo:" + retByte.Length + "time:" + time1 + "lz4:" + reByte2.Length + "time:" + time2);
-            */
+            MessageBox.Show("压缩前jpeg大小：" + ms.ToArray().Length + "zip:" + msIzip.ToArray().Length + "lzo:" + retByte.Length + "time:" + time1 + "lz4_1:" + reByte2.Length +  "time:" + time2);
+            
             //FileStream fs=File.OpenWrite("D:\\testunzip2.zip");
            // fs.Write(msIzip.ToArray(), 0, msIzip.ToArray().Length);
             
@@ -284,29 +286,26 @@ namespace ComparerTest
            Thread test = new Thread(new ThreadStart(testFun));
             test.IsBackground = true;
             test.Start();*/
-            Bitmap btm1 = getScreenPic();
-            MemoryStream ms = new MemoryStream();
-            btm1.Save(ms, ImageFormat.Jpeg);
-           // Bitmap btm3 =(Bitmap)Bitmap.FromStream(ms);
-            Bitmap btm3 = new Bitmap(1920, 1080, PixelFormat.Format24bppRgb);
-            Bitmap btm2 = null;
-           
+          /*  Bitmap btm1 = getScreenPic();
+            btm1.Save("D:\\test.bmp", ImageFormat.Bmp);
             Stopwatch watch = new Stopwatch();
             watch.Start();
-            for (int i = 1000; i > 0; i--)
+            for (int i = 100; i > 0; i--)
             {
-               BitmapData bd= btm1.LockBits(new Rectangle(0, 0, btm1.Width, btm1.Height),ImageLockMode.ReadOnly,PixelFormat.Format24bppRgb);
+             // BitmapData bd= btm1.LockBits(new Rectangle(0, 0, btm1.Width, btm1.Height),ImageLockMode.ReadOnly,PixelFormat.Format24bppRgb);
                 //btm2 = (Bitmap)btm3.Clone(new Rectangle(0, 0, btm1.Width, btm1.Height), PixelFormat.Format24bppRgb);
                // btm2 = new Bitmap(btm1.Width, btm1.Height);               
                //btm2= Core.ImageComparer.getBlockBitmap(new Rectangle(0, 0, 800, 800), btm1);
                //btm2.Save("D:\\test" +i+ ".jpg", ImageFormat.Jpeg);
                 //btm2.Dispose();
-               btm1.UnlockBits(bd);
+               //btm1.UnlockBits(bd);
+                //new Rectangle(0, 0, 3000, 3000);
+                getScreenPic();
             }
             //btm2 = Core.ImageComparer.getBlockBitmap(new Rectangle(0, 0, 800, 800), btm1);
             watch.Stop();
             MessageBox.Show(watch.ElapsedMilliseconds+"ms");
-            
+            */
         }
 
         private void testFun()
@@ -354,19 +353,29 @@ namespace ComparerTest
  
  
         }
-       
 
+       
         private static Size screenSize = Screen.PrimaryScreen.Bounds.Size;
+        private static  int STAND169_HEIGHT = 720;
+        private static int STAND169_WIDTH = 1280;
+        private static float scale = (float)Math.Min((double)STAND169_HEIGHT / screenSize.Height, (double)STAND169_WIDTH / screenSize.Width);
         public  Bitmap getScreenPic()
         {
             
             try
             {
-                Bitmap btm = new Bitmap(screenSize.Width, screenSize.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-                Graphics g1 = Graphics.FromImage(btm);
+                Bitmap btm2 = new Bitmap(screenSize.Width,screenSize.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                Graphics g1 = Graphics.FromImage(btm2);
                 
-                g1.CopyFromScreen(0, 0, 0, 0, screenSize);//得到屏幕截图
+                //得到屏幕截图
+                g1.CopyFromScreen(0, 0, 0, 0,screenSize);
                 g1.Dispose();
+                Bitmap btm = new Bitmap(STAND169_WIDTH, STAND169_HEIGHT, PixelFormat.Format24bppRgb);
+                Graphics g = Graphics.FromImage(btm);
+                g.ScaleTransform(scale, scale);
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                g.DrawImage(btm2, 0, 0);
+                g.Dispose();
                 return btm;
 
             }

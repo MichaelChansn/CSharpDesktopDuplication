@@ -65,7 +65,7 @@ namespace ControlServer1._0
                 serverSocketThread.IsBackground = true;
                 serverSocketThread.Start(serverSocket);
 
-                strInfo.Append("TCP服务端已经开启，端口号：8888\n");
+                strInfo.Append("TCP服务端已经开启，端口号：8888\r\n");
                 textBoxInfoShow.Text = strInfo.ToString();
                 buttonStartSocket.Text="停止socket";
             }
@@ -104,6 +104,8 @@ namespace ControlServer1._0
                 try
                 {
                     Socket clientSocket = ((Socket)serverSocket).Accept();
+                    strInfo.Append("有客户端连接到来-->"+clientSocket.RemoteEndPoint.ToString()+"\r\n");
+                    textBoxInfoShow.Text = strInfo.ToString();
                     clientSocketHandlerThread = new Thread(new ParameterizedThreadStart(clientSocketHandlerFun));
                     clientSocketHandlerThread.Priority = ThreadPriority.Highest;
                     clientSocketHandlerThread.IsBackground = true;

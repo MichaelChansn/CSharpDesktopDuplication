@@ -315,11 +315,11 @@ namespace ControlClient1._0
                     switch (type)
                     {
                         case RecPacket.BitmapType.BLOCK:
-                            Stopwatch sw = new Stopwatch();
-                            sw.Start();
+                            //Stopwatch sw = new Stopwatch();
+                            //sw.Start();
                             Bitmap recBitmap = RecoverBitmap.recoverScreenBitmap(difPoints, globalCompareBitmap, btm/*, bitCmpSize*/);
-                            sw.Stop();
-                            Console.WriteLine("client:"+sw.ElapsedMilliseconds+"ms");
+                            //sw.Stop();
+                            //Console.WriteLine("client:"+sw.ElapsedMilliseconds+"ms");
                             bitmapWithCursor.setCursorPoint(cursorpoint);
                             bitmapWithCursor.setScreenBitmap(recBitmap);
                             globalCompareBitmap = (Bitmap)recBitmap.Clone();
@@ -374,6 +374,7 @@ namespace ControlClient1._0
                         myCursor.Draw(g, new Rectangle(cursorPoint, new Size(10, 10)));
                         g.Dispose();
                     }
+                    display.
                     pictureBoxRec.BackgroundImage = display;
                     labeldispalyQueue.Text = "显示队列大小：" + screenCopyQueue.queue.Count + "\r\n";
                 }
