@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace ControlServer1._0.ScreenBitmap
 {
+    /**store the bitmap block size*/
     class ShortRec
     {
         public short xPoint;

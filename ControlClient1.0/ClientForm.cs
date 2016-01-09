@@ -212,7 +212,7 @@ namespace ControlClient1._0
                     //MessageBox.Show(getBitmapBytes.Length+"");
                     /**添加到接收队列*/
                     recPacketQueue.Enqueue(recpacket);
-                    labelQueueCap.Text = "接收队列大小：" + recPacketQueue.queue.Count + "\r\n";
+                    labelQueueCap.Text = "接收队列大小：" + recPacketQueue.getQueueSize()+ "\r\n";
                 }
                 catch (Exception ex)
                 {
@@ -283,7 +283,7 @@ namespace ControlClient1._0
                     /**放入差异队列*/
                     deCompressDifQueue.Enqueue(difbitWithCur);
 
-                    labelDif.Text = "差异队列大小：" + deCompressDifQueue.queue.Count + "\r\n";
+                    labelDif.Text = "差异队列大小：" + deCompressDifQueue.getQueueSize()+ "\r\n";
 
                 }
             }
@@ -332,7 +332,7 @@ namespace ControlClient1._0
                         default:
                             break;
                     }
-                    labeldispalyQueue.Text = "显示队列大小：" + screenCopyQueue.queue.Count + "\r\n";
+                    labeldispalyQueue.Text = "显示队列大小：" + screenCopyQueue.getQueueSize()+ "\r\n";
 
 
                 }
@@ -374,9 +374,8 @@ namespace ControlClient1._0
                         myCursor.Draw(g, new Rectangle(cursorPoint, new Size(10, 10)));
                         g.Dispose();
                     }
-                    display.
                     pictureBoxRec.BackgroundImage = display;
-                    labeldispalyQueue.Text = "显示队列大小：" + screenCopyQueue.queue.Count + "\r\n";
+                    labeldispalyQueue.Text = "显示队列大小：" + screenCopyQueue.getQueueSize()+ "\r\n";
                 }
                
  

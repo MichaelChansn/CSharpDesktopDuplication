@@ -86,7 +86,7 @@
     <Compile Include="BitmapTools\BitmapCmp32Bit.cs" />
     <Compile Include="BitmapTools\GetDifBlocks.cs" />
     <Compile Include="BitmapTools\JpegZip.cs" />
-    <Compile Include="CopyScreenAndBitmapTools\BitmapTool.cs" />
+    <Compile Include="CopyScreenAndBitmapTools\Compress2JepgWithQty.cs" />
     <Compile Include="CopyScreenAndBitmapTools\CopyScreen.cs" />
     <Compile Include="DataPacket\RecPacket.cs" />
     <Compile Include="DesktopDuplication\DesktopDuplicationException.cs" />
@@ -157,6 +157,7 @@
     <Compile Include="ICSharpCode.SharpZLib\Zip\ZipInputStream.cs" />
     <Compile Include="ICSharpCode.SharpZLib\Zip\ZipNameTransform.cs" />
     <Compile Include="ICSharpCode.SharpZLib\Zip\ZipOutputStream.cs" />
+    <Compile Include="OSInfos\OperatingSystemInfos.cs" />
     <Compile Include="ScreenBitmap\BitmapWithCursor.cs" />
     <Compile Include="ScreenBitmap\DifferentBitmapWithCursor.cs" />
     <Compile Include="ScreenBitmap\ShortPoint.cs" />

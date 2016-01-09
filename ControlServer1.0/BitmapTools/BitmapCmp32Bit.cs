@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace ControlServer1._0.BitmapTools
 {
+    /**this class is used for compare two 32bppArgb format Bimaps, 
+     * 24bpprgb is  not the same with 32bppArgb,
+     * so we can not use the same function to compare them.*/
     class BitmapCmp32Bit
     {
         /// <summary>
@@ -38,7 +41,7 @@ namespace ControlServer1._0.BitmapTools
         /// <param name="block"></param>
         /// <returns></returns>
         /// 
-        public static List<ShortRec> CompareS(Rectangle[] dirtyRecs, Bitmap globalBtm, Bitmap lastFrame, Size block)
+        public static List<ShortRec> Compare(Rectangle[] dirtyRecs, Bitmap globalBtm, Bitmap lastFrame, Size block)
         {
             List<ShortRec> difPoint = new List<ShortRec>();
             PixelFormat pf = PixelFormat.Format32bppArgb;

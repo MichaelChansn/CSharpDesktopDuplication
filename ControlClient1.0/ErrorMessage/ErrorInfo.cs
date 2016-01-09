@@ -36,7 +36,7 @@ namespace ControlClient1._0.ErrorMessage
                     {
                         FileStream fs = new FileStream(errorOutputFilePath, FileMode.Append);
                         StreamWriter sw = new StreamWriter(fs, Encoding.Default);
-                        sw.Write(message);
+                        sw.Write(DateTime.Now.ToLocalTime()+":"+message);
                         sw.WriteLine();
                         sw.Close();
                         fs.Close();

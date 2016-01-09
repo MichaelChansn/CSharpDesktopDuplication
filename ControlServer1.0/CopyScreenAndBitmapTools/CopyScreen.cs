@@ -27,13 +27,11 @@ namespace ControlServer1._0.CopyScreenAndBitmapTools
         public static Size getReslution()
         {
             return Screen.PrimaryScreen.Bounds.Size;
-
         }
         public static  Bitmap getScreenPicWithCursor(Form app)
         {
             try
             {
-
                 Bitmap btm = new Bitmap(screenSize.Width, screenSize.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
                 Graphics g1 = Graphics.FromImage(btm);
                 g1.CopyFromScreen(0, 0, 0, 0, screenSize);//得到屏幕截图
@@ -97,7 +95,7 @@ namespace ControlServer1._0.CopyScreenAndBitmapTools
             }
         }
         /// <summary>
-        /// 通过DXGI获取桌面图形，只能用于win8以上系统
+        /// 通过DXGI获取桌面图形，只能用于win8以上系统,效果媲美Mirror driver
         /// 返回值有可能是null（超时会返回0），注意判断使用
         /// </summary>
         /// <returns></returns>

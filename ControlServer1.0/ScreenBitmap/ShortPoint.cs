@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ControlServer1._0.ScreenBitmap
 {
-    /**图像差异起始地址，需要配合block的大小进行图形复原*/
+    /**store the cursor points*/
     class ShortPoint
     {
         private short xPoint;

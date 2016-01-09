@@ -53,6 +53,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BitmapTool.cs" />
     <Compile Include="BlockQueue.cs" />
     <Compile Include="Core\ImageComparer.cs" />
     <Compile Include="Form1.cs">

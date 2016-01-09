@@ -219,15 +219,15 @@ namespace ComparerTest
            // MessageBox.Show("耗时：" + watch.ElapsedMilliseconds);
            //MessageBox.Show("耗时：" + watch.ElapsedMilliseconds + "压缩前大小：" + ms.ToArray().Length + "Izip:" + msIzip.ToArray().Length+"Iunzip:"+msUnzip.ToArray().Length);
           //  MessageBox.Show(Encoding.ASCII.GetBytes("KS").Length+"");
-            
+            /*
             Bitmap btm1 = getScreenPic();
             Thread.Sleep(3000);
              Bitmap btm2 = getScreenPic();
              List<Rectangle> difpoints = Core.ImageComparer.Compare(btm1, btm2);
              Bitmap getDifBitmap = Core.ImageComparer.getBlocksIn1Bitmap(difpoints,btm2, new Size(10, 10));
-             getDifBitmap.Save("D:\\test.jpeg", ImageFormat.Jpeg);
+             getDifBitmap.Save("D:\\test.jpeg", ImageFormat.Bmp);
             MemoryStream ms = new MemoryStream();
-            getDifBitmap.Save(ms, ImageFormat.Jpeg);
+            getDifBitmap.Save(ms, ImageFormat.Bmp);
             ms.Close();
             MemoryStream msIzip = new MemoryStream();
             ZipOutputStream outZip = new ZipOutputStream(msIzip);
@@ -247,7 +247,7 @@ namespace ComparerTest
             watch.Stop();
             long time2 = watch.ElapsedMilliseconds;
             MessageBox.Show("压缩前jpeg大小：" + ms.ToArray().Length + "zip:" + msIzip.ToArray().Length + "lzo:" + retByte.Length + "time:" + time1 + "lz4_1:" + reByte2.Length +  "time:" + time2);
-            
+            */
             //FileStream fs=File.OpenWrite("D:\\testunzip2.zip");
            // fs.Write(msIzip.ToArray(), 0, msIzip.ToArray().Length);
             
@@ -306,7 +306,64 @@ namespace ComparerTest
             watch.Stop();
             MessageBox.Show(watch.ElapsedMilliseconds+"ms");
             */
+            /*
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+            byte[] testByte1 = new byte[1920 * 1080 * 3];
+            byte[] testByte2 = new byte[1920 * 1080 * 3];
+            for (int i = 0; i < 1920 * 1080 * 3; i++)
+            {
+                testByte1[i] =testByte2[i]= (byte)i;
+            }
+            watch.Stop();
+            MessageBox.Show(watch.ElapsedMilliseconds + "ms");*/
+            /*
+            Bitmap btm1 = getScreenPic();
+            Thread.Sleep(3000);
+            Bitmap btm2 = getScreenPic();
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+            MemoryStream m1 = new MemoryStream();
+            MemoryStream m2 = new MemoryStream();
+            btm1.Save(m1, ImageFormat.Bmp);
+            btm2.Save(m2, ImageFormat.Bmp);
+            m1.Close();
+            m2.Close();
+            byte[] btmBytes1 = m1.ToArray();
+            byte[] btmBytes2 = m2.ToArray();
+            MemoryStream mo = new MemoryStream();
+            int len1=btmBytes1.Length;
+            int len2=btmBytes2.Length;
+            int forValue=Math.Min(len1,len2);
+            int ret=0;
+            for (int i = 0; i < forValue; i++)
+            {
+                if (btmBytes1[i] != btmBytes2[i])
+                {
+                    mo.WriteByte(btmBytes2[i]);
+                    ret++;
+                    //Console.WriteLine("index:" + i);
+                }
+            }
+            byte[] retByte = (new LZOCompressor()).Compress(mo.ToArray());
+            watch.Stop();
+            mo.Close();
+
+            MessageBox.Show("times:" + watch.ElapsedMilliseconds + "ms " + "dif:" + ret + " lzo:" + retByte.Length);
+             * */
+            
+            //获取系统信息
+            System.OperatingSystem osInfo = System.Environment.OSVersion;
+
+            //获取操作系统ID
+            System.PlatformID platformID = osInfo.Platform;
+            //获取主版本号
+            int versionMajor = osInfo.Version.Major;
+            //获取副版本号
+            int versionMinor = osInfo.Version.Minor;
+            MessageBox.Show("platformID:"+platformID.ToString()+" Major:"+versionMajor+" minor:"+versionMinor);
         }
+
 
         private void testFun()
         {
@@ -370,13 +427,7 @@ namespace ComparerTest
                 //得到屏幕截图
                 g1.CopyFromScreen(0, 0, 0, 0,screenSize);
                 g1.Dispose();
-                Bitmap btm = new Bitmap(STAND169_WIDTH, STAND169_HEIGHT, PixelFormat.Format24bppRgb);
-                Graphics g = Graphics.FromImage(btm);
-                g.ScaleTransform(scale, scale);
-                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                g.DrawImage(btm2, 0, 0);
-                g.Dispose();
-                return btm;
+                return btm2;
 
             }
             catch (Exception ex)

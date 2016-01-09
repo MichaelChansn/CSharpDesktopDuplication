@@ -22,7 +22,7 @@ namespace ControlServer1._0.BitmapTools
             btm.Save(ms, ImageFormat.Jpeg);
             ms.Close();
             byte[] retByte=(new LZOCompressor()).Compress(ms.ToArray());
-            /*
+            /*zip compress ,it is cost too much cpu ,so we do not use this compress way.
             ZipOutputStream outZip = new ZipOutputStream(msIzip);
             outZip.SetLevel(9);
             outZip.PutNextEntry(new ZipEntry("KS"));
