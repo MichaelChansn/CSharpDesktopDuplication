@@ -153,8 +153,6 @@ namespace ControlServer1._0
             this.buttonServer.Cursor = System.Windows.Forms.Cursors.Hand;
             this.buttonServer.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(158)))), ((int)(((byte)(146)))));
             this.buttonServer.FlatAppearance.BorderSize = 0;
-            this.buttonServer.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Red;
-            this.buttonServer.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Red;
             this.buttonServer.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonServer.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.buttonServer.ForeColor = System.Drawing.Color.White;
@@ -169,7 +167,7 @@ namespace ControlServer1._0
             // 
             // panelLine
             // 
-            this.panelLine.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(123)))), ((int)(((byte)(123)))), ((int)(((byte)(123)))));
+            this.panelLine.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(153)))), ((int)(((byte)(153)))), ((int)(((byte)(153)))));
             this.panelLine.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.panelLine.Location = new System.Drawing.Point(2, 153);
             this.panelLine.Margin = new System.Windows.Forms.Padding(0);
@@ -194,7 +192,7 @@ namespace ControlServer1._0
             this.labelAddr.AutoSize = true;
             this.labelAddr.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Bold);
             this.labelAddr.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(183)))), ((int)(((byte)(183)))), ((int)(((byte)(183)))));
-            this.labelAddr.Location = new System.Drawing.Point(7, 57);
+            this.labelAddr.Location = new System.Drawing.Point(11, 57);
             this.labelAddr.Name = "labelAddr";
             this.labelAddr.Size = new System.Drawing.Size(44, 16);
             this.labelAddr.TabIndex = 1;
@@ -206,10 +204,10 @@ namespace ControlServer1._0
             this.textBoxHost.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBoxHost.Font = new System.Drawing.Font("宋体", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.textBoxHost.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(183)))), ((int)(((byte)(183)))), ((int)(((byte)(183)))));
-            this.textBoxHost.Location = new System.Drawing.Point(51, 17);
+            this.textBoxHost.Location = new System.Drawing.Point(58, 17);
             this.textBoxHost.Margin = new System.Windows.Forms.Padding(0);
             this.textBoxHost.Name = "textBoxHost";
-            this.textBoxHost.Size = new System.Drawing.Size(216, 29);
+            this.textBoxHost.Size = new System.Drawing.Size(202, 29);
             this.textBoxHost.TabIndex = 0;
             this.textBoxHost.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
@@ -218,7 +216,7 @@ namespace ControlServer1._0
             this.labelHost.AutoSize = true;
             this.labelHost.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Bold);
             this.labelHost.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(183)))), ((int)(((byte)(183)))), ((int)(((byte)(183)))));
-            this.labelHost.Location = new System.Drawing.Point(7, 23);
+            this.labelHost.Location = new System.Drawing.Point(11, 23);
             this.labelHost.Name = "labelHost";
             this.labelHost.Size = new System.Drawing.Size(44, 16);
             this.labelHost.TabIndex = 1;
@@ -230,10 +228,10 @@ namespace ControlServer1._0
             this.textBoxAddr.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBoxAddr.Font = new System.Drawing.Font("宋体", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.textBoxAddr.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(183)))), ((int)(((byte)(183)))), ((int)(((byte)(183)))));
-            this.textBoxAddr.Location = new System.Drawing.Point(51, 52);
+            this.textBoxAddr.Location = new System.Drawing.Point(58, 52);
             this.textBoxAddr.Margin = new System.Windows.Forms.Padding(0);
             this.textBoxAddr.Name = "textBoxAddr";
-            this.textBoxAddr.Size = new System.Drawing.Size(216, 29);
+            this.textBoxAddr.Size = new System.Drawing.Size(202, 29);
             this.textBoxAddr.TabIndex = 0;
             this.textBoxAddr.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 

@@ -211,6 +211,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ICSharpCode.SharpZLib\ICSharpCode.SharpZLib.csproj" />
+    <None Include="Resources\win10.jpg" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

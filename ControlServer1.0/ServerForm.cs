@@ -29,7 +29,6 @@ namespace ControlServer1._0
     public partial class ServerForm : Form
     {
         private static int PORT = 8888;
-        private static StringBuilder strInfo=new StringBuilder();
         private static Socket serverSocket = null;
         private static Thread serverSocketThread = null;//服务器等待连接线程
         private static Thread clientSocketHandlerThread = null;//客户端连接处理线程
@@ -40,11 +39,28 @@ namespace ControlServer1._0
         private static Thread bitmapCmpThread = null;//图形差异比较线程
         private static Thread sendPacketThread = null;//数据发送线程
         private static Thread recPacketThread = null;//数据接收线程
+        private static Socket clientSocket = null;
 
         private static bool isServerRun = false;
-        private static bool isClentRun = false;
+        private static bool isClientRun = false;
         private static bool isSendPic = false;
         private static bool isWin8Above = false;
+
+        /**创建一个10帧大小的屏幕截图队列*/
+        private BlockingQueue<BitmapWithCursor> screenCopyQueue = new BlockingQueue<BitmapWithCursor>(10);
+
+        /**创建一个5帧大小的jpeg屏幕差异队列*/
+        private BlockingQueue<DifferentBitmapWithCursor> screenCopyDifQueue = new BlockingQueue<DifferentBitmapWithCursor>(10);
+
+
+        /**创建一个大小为10的发送队列*/
+        private BlockingQueue<SendPacket> sendPacketQueue = new BlockingQueue<SendPacket>(10);
+
+        /**创建一个大小为10的接受队列*/
+        private BlockingQueue<RecPacket> recpacketQueue = new BlockingQueue<RecPacket>(10);
+
+        /**全局比较图形*/
+        private static Bitmap globalComparerBitmap = null;
         public ServerForm()
         {
             InitializeComponent();
@@ -53,7 +69,7 @@ namespace ControlServer1._0
             Console.WriteLine("system is win8 above:"+isWin8Above);
         }
 
-        private void buttonStartSocket_Click(object sender, EventArgs e)
+        private void buttonServer_Click(object sender, EventArgs e)
         {
             if (!isServerRun)
             {
@@ -69,28 +85,70 @@ namespace ControlServer1._0
                 serverSocketThread.IsBackground = true;
                 serverSocketThread.Start(serverSocket);
 
-                strInfo.Append("TCP服务端已经开启，端口号：8888\r\n");
-                textBoxInfoShow.Text = strInfo.ToString();
-                buttonStartSocket.Text="停止socket";
+                textBoxHost.Text = "SERVER IS RUNNING...";
+                textBoxAddr.Text = "WAIT FOR CLIENT...";
+                buttonServer.Text = "STOP SERVER";
             }
             else
             {
                 isServerRun = false;
-                buttonStartSocket.Text = "启动socket";
+                buttonServer.Text = "START SERVER";
+                textBoxHost.Text = "SERVER IS CLOSE...";
+                textBoxAddr.Text = "";
                 try
                 {
-                    serverSocketThread.Interrupt();
-                    serverSocket.Shutdown(SocketShutdown.Both);
-                    serverSocket.Close();
+                    stopAllThreads();
+
                 }
-                catch (SocketException)
-                { 
+                catch (SocketException se)
+                {
+                    Console.WriteLine(se.Message);
+                    ErrorInfo.getErrorWriter().writeErrorMassageToFile(se.Message);
                 }
 
             }
 
         }
 
+        /**stop all the threads when exit or close the main serverSocket*/
+        private void stopAllThreads()
+        {
+            if (serverSocket!=null)
+            {
+                serverSocket.Close();
+                serverSocket = null;
+                isServerRun = false;
+            }
+            if (clientSocket != null)
+            {
+                stopClient(clientSocket);
+            }
+            isServerRun = false;
+            if (serverSocketThread != null)
+            {
+                serverSocketThread.Interrupt();
+                serverSocketThread.Abort();
+                serverSocketThread = null;
+            }
+            if (clientSocketHandlerThread != null)
+            {
+                clientSocketHandlerThread.Interrupt();
+                clientSocketHandlerThread.Abort();
+                clientSocketHandlerThread = null;
+            }
+            if (sendPacketThread != null)
+            {
+                sendPacketThread.Interrupt();
+                sendPacketThread.Abort();
+                sendPacketThread = null;
+            }
+            if (recPacketThread != null)
+            {
+                recPacketThread.Interrupt();
+                recPacketThread.Abort();
+                recPacketThread = null;
+            }
+        }
         /**
          * 服务线程，用来接收链接
          */
@@ -100,16 +158,24 @@ namespace ControlServer1._0
             {
                 try
                 {
-                    Socket clientSocket = ((Socket)serverSocket).Accept();
-                    strInfo.Append("有客户端连接到来-->"+clientSocket.RemoteEndPoint.ToString()+"\r\n");
-                    textBoxInfoShow.Text = strInfo.ToString();
-                    clientSocketHandlerThread = new Thread(new ParameterizedThreadStart(clientSocketHandlerFun));
-                    clientSocketHandlerThread.Priority = ThreadPriority.Highest;
-                    clientSocketHandlerThread.IsBackground = true;
-                    clientSocketHandlerThread.Start(clientSocket);
+                        Socket client = ((Socket)serverSocket).Accept();
+                        if (clientSocket != null)
+                        {
+                            stopClient(clientSocket);
+                            
+                        }
+                        clientSocket = client;
+                        textBoxHost.Text = "CLIENT IS CONNECTED !";
+                        textBoxAddr.Text = clientSocket.RemoteEndPoint.ToString();
+                        clientSocketHandlerThread = new Thread(new ParameterizedThreadStart(clientSocketHandlerFun));
+                        clientSocketHandlerThread.Priority = ThreadPriority.Highest;
+                        clientSocketHandlerThread.IsBackground = true;
+                        clientSocketHandlerThread.Start(clientSocket);
                 }
                 catch (Exception ex)
                 {
+
+                    Console.WriteLine(ex.Message);
                     ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message + "\r\n" + ex.StackTrace);
                     
                 }
@@ -119,31 +185,12 @@ namespace ControlServer1._0
 
 
         
-        /**创建一个10帧大小的屏幕截图队列*/
-        private BlockingQueue<BitmapWithCursor> screenCopyQueue = new BlockingQueue<BitmapWithCursor>(10);
-        
-        /**创建一个5帧大小的jpeg屏幕差异队列*/
-        private BlockingQueue<DifferentBitmapWithCursor> screenCopyDifQueue = new BlockingQueue<DifferentBitmapWithCursor>(10);
-
-
-        /**创建一个大小为10的发送队列*/
-        private BlockingQueue<SendPacket> sendPacketQueue = new BlockingQueue<SendPacket>(10);
-
-        /**创建一个大小为10的接受队列*/
-        private BlockingQueue<RecPacket> recpacketQueue = new BlockingQueue<RecPacket>(10);
-
-        /**全局比较图形*/
-        private static Bitmap globalComparerBitmap = null;
-        
        
         private void clientSocketHandlerFun(object clientSocket)
         {
 
+            isClientRun = true;
 
-            isClentRun = true;
-
-          
-            
             /**开启各种工作线程*/
 
             /*1*数据接收线程*/
@@ -158,25 +205,8 @@ namespace ControlServer1._0
             sendPacketThread.IsBackground = true;
             sendPacketThread.Start(clientSocket);
 
-
-            /*3*截屏线程*/
-            copyScreenThread = new Thread(new ThreadStart(copyScreenToBlockingQueue));
-            copyScreenThread.Priority = ThreadPriority.AboveNormal;
-            copyScreenThread.IsBackground = true;
-            copyScreenThread.Start();
-            
-
-            /*4*图像差异比较线程*/
-            bitmapCmpThread = new Thread(new ThreadStart(bitmapCmpToBlockingQueue));
-            bitmapCmpThread.Priority = ThreadPriority.AboveNormal;
-            bitmapCmpThread.IsBackground = true;
-            bitmapCmpThread.Start();
-
-            /*5*压缩线程*/
-            compressThread = new Thread(new ThreadStart(bitmapZipToBlockingQueue));
-            compressThread.Priority = ThreadPriority.AboveNormal;
-            compressThread.IsBackground = true;
-            compressThread.Start();
+            startSendPic();
+           
                
             
 
@@ -186,36 +216,62 @@ namespace ControlServer1._0
         /**线程接收函数*/
         private void recPacketFun(object clientSocket)
         {
-            NetworkStream stream = new NetworkStream((Socket)clientSocket);
+            if (clientSocket == null) return;
+            Socket client = (Socket)clientSocket;
+            if (!client.Connected) return;
+            NetworkStream stream = new NetworkStream(client);
             BinaryReader reader = new BinaryReader(stream);
-            while (isClentRun)
+            while (isClientRun)
             {
                 //TODO
-                Thread.Sleep(5000);
+                    try
+                    {
+                        Thread.Sleep(5000);
+
+                    }
+                    catch (ThreadInterruptedException ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                        ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message);
+                        isClientRun = false;
+                        return;
+                    }
+                
             }
  
         }
         /**数据发送函数*/
         private void sendPacketFun(object clientSocket)
         {
+            if (clientSocket == null) return;
             Socket client = (Socket)clientSocket;
+            if (!client.Connected) return;
             NetworkStream stream = new NetworkStream(client);
             BinaryWriter writer = new BinaryWriter(stream);
-            //使用while，防止线程的伪唤醒
+           /* //使用while，防止线程的伪唤醒
             while (!isSendPic)
             {   //客户端未请求图形时，阻塞，类似java中的object.wait()
-                manualEvent.WaitOne();
+                try
+                {
+                    manualEvent.WaitOne();
+                }
+                catch (ThreadInterruptedException ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message);
+                    return;
+                }
             }
-            
+            */
 
 
-            while (isSendPic)
+            while (isClientRun)
             {
                 //TODO
                SendPacket sendpacket = sendPacketQueue.Dequeue();
                if (sendpacket != null)
                {
-                   textBoxSend.Text = "send队列：" + sendPacketQueue.getQueueSize();
+                  
                    try
                    {
                        writer.Write((Int32)sendpacket.getbitmapBytesLength());
@@ -247,7 +303,9 @@ namespace ControlServer1._0
                    }
                    catch (Exception ex)
                    {
-                       ErrorInfo.getErrorWriter().writeErrorMassageToFile(DateTime.Now.ToString()+ex.Message+"\r\n"+ex.StackTrace+"\r\n");
+                       isClientRun = false;
+                       Console.WriteLine(ex.Message);
+                       ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message+"\r\n"+ex.StackTrace+"\r\n");
                    }
                }
             }
@@ -256,8 +314,8 @@ namespace ControlServer1._0
         }
 
         /**截图函数*/
-        private object openSendPic = new object();
-        ManualResetEvent manualEvent = new ManualResetEvent(false);
+       /* private object openSendPic = new object();
+        ManualResetEvent manualEvent = new ManualResetEvent(false);*/
        
         /**根据屏幕变化的率的大小，动态的调整截屏间隔，优化流量和流畅度。
          * 最小50，最大950;
@@ -265,11 +323,20 @@ namespace ControlServer1._0
         private static int dynamicTime = 90;
         private void copyScreenToBlockingQueue()
         {
-            //使用while，防止线程的伪唤醒
+          /*  //使用while，防止线程的伪唤醒
             while (!isSendPic)
             {   //客户端未请求图形时，阻塞，类似java中的object.wait()
-                manualEvent.WaitOne();
-            }
+                try
+                {
+                    manualEvent.WaitOne();
+                }
+                catch (ThreadInterruptedException ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message);
+                    return;
+                }
+            }*/
             Stopwatch sw = new Stopwatch();
             sw.Start();
             int fps = 0;//统计FPS
@@ -277,8 +344,18 @@ namespace ControlServer1._0
             
             while (isSendPic)
             {
+                try
+                {
+                    Thread.Sleep(dynamicTime);
+                }
+                catch (ThreadInterruptedException ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message);
+                    isSendPic = false;
+                    return;
+                }
                 
-                Thread.Sleep(dynamicTime);
 
                 if (isWin8Above)//above win8 version
                 {
@@ -298,7 +375,7 @@ namespace ControlServer1._0
                         bitmapWithCursor.setScreenBitmap(frame.DesktopImage);
                         bitmapWithCursor.dirtyRecs = frame.UpdatedRegions;
                         screenCopyQueue.Enqueue(bitmapWithCursor);
-                        textBoxCopy.Text = "copy队列：" + screenCopyQueue.getQueueSize();
+                        textBoxCSQ.Text = "" + screenCopyQueue.getQueueSize();
                     }
 
                 }
@@ -314,7 +391,7 @@ namespace ControlServer1._0
                         bitmapWithCursor.setCursorPoint(new ShortPoint(cursorX, cursorY));
                         bitmapWithCursor.setScreenBitmap(btm);
                         screenCopyQueue.Enqueue(bitmapWithCursor);
-                        textBoxCopy.Text = "copy队列：" + screenCopyQueue.getQueueSize();
+                        textBoxCSQ.Text = "" + screenCopyQueue.getQueueSize();
                     }
                 }
 
@@ -322,7 +399,7 @@ namespace ControlServer1._0
                 if (sw.ElapsedMilliseconds > 1000)
                 {
                     sw.Restart();
-                    textBoxTimeShow.Text = "fps：" + fps;
+                    textBoxFPS.Text = "" + fps;
                     fps = 0;
                 }
 
@@ -330,21 +407,92 @@ namespace ControlServer1._0
 
 
         }
+        private void stopClient(Socket client)
+        {
+            isClientRun = false;
+            isSendPic = false;
+            isFirstFrame=true;
+            clientSocket.Close();
+            clientSocket = null;
+            stopSendPic();
+            if (clientSocketHandlerThread != null)
+            {
+                clientSocketHandlerThread.Interrupt();
+                clientSocketHandlerThread.Abort();
+                clientSocketHandlerThread = null;
+            }
+            
+            if (sendPacketThread != null)
+            {
+                sendPacketThread.Interrupt();
+                sendPacketThread.Abort();
+                sendPacketThread = null;
+            }
+            if (recPacketThread != null)
+            {
+                recPacketThread.Interrupt();
+                recPacketThread.Abort();
+                recPacketThread = null;
+            }
+            screenCopyQueue.clearQueue();
+            screenCopyDifQueue.clearQueue();
+            sendPacketQueue.clearQueue();
+            recpacketQueue.clearQueue();
 
+        }
 
         /**开始发送截图，流水线开始工作*/
         private void startSendPic()
         {
             isSendPic = true;
-            manualEvent.Set();
+            /*manualEvent.Set();*/
+            /*3*截屏线程*/
+            copyScreenThread = new Thread(new ThreadStart(copyScreenToBlockingQueue));
+            copyScreenThread.Priority = ThreadPriority.AboveNormal;
+            copyScreenThread.IsBackground = true;
+            copyScreenThread.Start();
+
+
+            /*4*图像差异比较线程*/
+            bitmapCmpThread = new Thread(new ThreadStart(bitmapCmpToBlockingQueue));
+            bitmapCmpThread.Priority = ThreadPriority.AboveNormal;
+            bitmapCmpThread.IsBackground = true;
+            bitmapCmpThread.Start();
+
+            /*5*压缩线程*/
+            compressThread = new Thread(new ThreadStart(bitmapZipToBlockingQueue));
+            compressThread.Priority = ThreadPriority.AboveNormal;
+            compressThread.IsBackground = true;
+            compressThread.Start();
  
         }
 
         /**停止发送截图，流水线停止工作*/
         private void stopSendPic()
         {
+            
             isSendPic = false;
-            manualEvent.Reset();
+            isFirstFrame = true;
+            /* manualEvent.Reset();*/
+            if (copyScreenThread != null)
+            {
+                copyScreenThread.Interrupt();
+                copyScreenThread.Abort();
+                copyScreenThread = null;
+            }
+            if (bitmapCmpThread != null)
+            {
+                bitmapCmpThread.Interrupt();
+                bitmapCmpThread.Abort();
+                bitmapCmpThread = null;
+            }
+            if (compressThread != null)
+            {
+                compressThread.Interrupt();
+                compressThread.Abort();
+                compressThread = null;
+            }
+           
 
         }
 
@@ -365,11 +513,20 @@ namespace ControlServer1._0
 
         private void bitmapCmpToBlockingQueue()
         {
-            //使用while，防止线程的伪唤醒
+          /*  //使用while，防止线程的伪唤醒
             while (!isSendPic)
             {   //客户端未请求图形时，阻塞，类似java中的object.wait()
-                manualEvent.WaitOne();
-            }
+                try
+                {
+                    manualEvent.WaitOne();
+                }
+                catch (ThreadInterruptedException ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message);
+                    return;
+                }
+            }*/
             while (isSendPic)
             {
                 BitmapWithCursor bitmapWithCursor=screenCopyQueue.Dequeue();
@@ -428,7 +585,7 @@ namespace ControlServer1._0
 
 
                             screenCopyDifQueue.Enqueue(differentBitmapWithCursor);
-
+                            textBoxDBQ.Text = "" + screenCopyDifQueue.getQueueSize();
                             /**更新全局比较帧*/
                             globalComparerBitmap = (Bitmap)btm1.Clone();
                         }
@@ -449,6 +606,7 @@ namespace ControlServer1._0
             differentBitmapWithCursor.setCursorPoint(point);
             differentBitmapWithCursor.setDifBitmap(newKeyFrame);
             screenCopyDifQueue.Enqueue(differentBitmapWithCursor);
+            textBoxDBQ.Text = "" + screenCopyDifQueue.getQueueSize();
         }
 
         /**为了保证图像质量，可以每隔一段时间，发送一次关键帧进行图形矫正*/
@@ -462,17 +620,26 @@ namespace ControlServer1._0
         /**压缩函数*/
         private void bitmapZipToBlockingQueue()
         {
-             //使用while，防止线程的伪唤醒
+           /* //使用while，防止线程的伪唤醒
             while (!isSendPic)
             {   //客户端未请求图形时，阻塞，类似java中的object.wait()
-                manualEvent.WaitOne();
-            }
+                try
+                {
+                    manualEvent.WaitOne();
+                }
+                catch (ThreadInterruptedException ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message);
+                    return;
+                }
+            }*/
             while (isSendPic)
             {
                 DifferentBitmapWithCursor differentBitmapWithCursor = screenCopyDifQueue.Dequeue();
                 if (differentBitmapWithCursor != null)
                 {
-                    textBoxDif.Text = "dif队列：" + screenCopyDifQueue.getQueueSize();
+                    
                     SendPacket sendPacket = new SendPacket();
                     sendPacket.setBitmapType(differentBitmapWithCursor.getBitmapType());
                     sendPacket.setCursorPoint(differentBitmapWithCursor.getCursorPoint());
@@ -482,6 +649,7 @@ namespace ControlServer1._0
                     sendPacket.setBitByts(bmpBytes);
                     sendPacket.setBitmapBytesLength(bmpBytes.Length);
                     sendPacketQueue.Enqueue(sendPacket);
+                    textBoxSDQ.Text = sendPacketQueue.getQueueSize() + "";
                 }
                
             }
@@ -490,34 +658,60 @@ namespace ControlServer1._0
 
        
 
-      
-        private void buttonStartSendPic_Click(object sender, EventArgs e)
+
+
+        private Point mousePoint;
+        private int topA(Control cc)
         {
-
-            if (!isSendPic)
+            if (cc == null || cc == this) return 0;
+            if (cc.Parent == null || cc.Parent == this)
+                return cc.Top;
+            else
+                return topA(cc.Parent) + cc.Top;
+        }
+        private int leftA(Control cc)
+        {
+            if (cc == null || cc == this) return 0;
+            if (cc.Parent == null || cc.Parent == this)
+                return cc.Left;
+            else
+                return leftA(cc.Parent) + cc.Left;
+        }
+        private void top_MouseDown(object sender, MouseEventArgs e)
+        {
+            Control cc = (Control)sender;
+            if (e.Button == MouseButtons.Left)
             {
-                startSendPic();
-                buttonStartSendPic.Text = "停止发送";
-
+                mousePoint.X = e.X + leftA(cc);
+                mousePoint.Y = e.Y + topA(cc);
             }
-            else 
+        }
+        private void top_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
             {
-                stopSendPic();
-                buttonStartSendPic.Text = "发送图像";
-
+                Top = MousePosition.Y - mousePoint.Y;
+                Left = MousePosition.X - mousePoint.X;
             }
-         }
+        }
 
+        private void buttonClose_Click(object sender, EventArgs e)
+        {
+            
+           // stopAllThreads();
+            new Thread(new ThreadStart(stopAllThreads)).Start();
+            Application.Exit();
+        }
 
-        private void timer1_Tick(object sender, EventArgs e)
+        private void buttonMin_Click(object sender, EventArgs e)
+        {
+            this.WindowState = System.Windows.Forms.FormWindowState.Minimized;
+        }
+
+        private void timerGC_Tick(object sender, EventArgs e)
         {
             GC.Collect();
         }
-
-
-
-      
-
        
         
        

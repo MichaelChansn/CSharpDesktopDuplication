@@ -163,6 +163,8 @@ namespace DesktopDuplication
                 }
                 if (ex.ResultCode.Failure)
                 {
+                    //return true;
+                    ReleaseFrame();
                     throw new DesktopDuplicationException("Failed to acquire next frame.");
                 }
             }

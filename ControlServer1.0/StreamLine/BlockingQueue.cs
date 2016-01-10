@@ -17,6 +17,10 @@ namespace ControlServer1._0.StreamLine
                 {
                     return queue.Count;
                 }
+                public void clearQueue()
+                {
+                    queue.Clear();
+                }
                 public void Enqueue(T item)
                 {
                     lock (queue)

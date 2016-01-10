@@ -153,6 +153,7 @@
     <Content Include="ICSharpCode.SharpZLib\obj\Debug\ICSharpCode.SharpZipLib.dll" />
     <Content Include="ICSharpCode.SharpZLib\obj\Debug\ICSharpCode.SharpZipLib.pdb" />
     <Content Include="ICSharpCode.SharpZLib\obj\ICSharpCode.SharpZLib.csproj.FileListAbsolute.txt" />
+    <None Include="Resources\win10.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ICSharpCode.SharpZLib\obj\Debug\TempPE\" />

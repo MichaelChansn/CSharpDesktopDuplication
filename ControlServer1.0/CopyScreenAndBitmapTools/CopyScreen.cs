@@ -106,9 +106,9 @@ namespace ControlServer1._0.CopyScreenAndBitmapTools
             {
                 frame = desktopDuplicator.GetLatestFrame();
             }
-            catch
+            catch(Exception ex)
             {
-                desktopDuplicator = new DesktopDuplicator(0);
+                Console.WriteLine("-------------->>>"+ex.Message);
             }
 
             return frame;
