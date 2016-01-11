@@ -19,7 +19,9 @@ namespace ControlServer1._0.StreamLine
                 }
                 public void clearQueue()
                 {
+                    lock(queue){
                     queue.Clear();
+                    }
                 }
                 public void Enqueue(T item)
                 {
@@ -31,7 +33,7 @@ namespace ControlServer1._0.StreamLine
                             {
                                 Monitor.Wait(queue);
                             }
-                            catch (ThreadInterruptedException ex)
+                            catch (Exception ex)
                             {
                                 ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message + ex.StackTrace);
                                 return;
@@ -56,7 +58,7 @@ namespace ControlServer1._0.StreamLine
                                 /**wait for add*/
                                 Monitor.Wait(queue);
                             }
-                            catch(ThreadInterruptedException ex)
+                            catch (Exception ex)
                             {
                                 ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message + ex.StackTrace);
                                 return default(T);

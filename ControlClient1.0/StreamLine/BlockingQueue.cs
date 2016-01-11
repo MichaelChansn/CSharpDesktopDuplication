@@ -16,6 +16,12 @@ namespace ControlClient1._0.StreamLine
         {
             return queue.Count;
         }
+        public void clearQueue()
+        {
+            lock(queue){
+            queue.Clear();
+            }
+        }
         public void Enqueue(T item)
         {
             lock (queue)
@@ -26,7 +32,7 @@ namespace ControlClient1._0.StreamLine
                     {
                         Monitor.Wait(queue);
                     }
-                    catch (ThreadInterruptedException ex)
+                    catch (Exception ex)
                     {
                         ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message + ex.StackTrace);
                         return;
@@ -51,7 +57,7 @@ namespace ControlClient1._0.StreamLine
                         /**wait for add*/
                         Monitor.Wait(queue);
                     }
-                    catch (ThreadInterruptedException ex)
+                    catch (Exception ex)
                     {
                         ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message + ex.StackTrace);
                         return default(T);

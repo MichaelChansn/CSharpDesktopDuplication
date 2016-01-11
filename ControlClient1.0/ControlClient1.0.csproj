@@ -75,6 +75,7 @@
     <Compile Include="ClientForm.Designer.cs">
       <DependentUpon>ClientForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="DataPacket\ENUMS.cs" />
     <Compile Include="DataPacket\RecPacket.cs" />
     <Compile Include="DataPacket\SendPacket.cs" />
     <Compile Include="ErrorMessage\ErrorInfo.cs" />

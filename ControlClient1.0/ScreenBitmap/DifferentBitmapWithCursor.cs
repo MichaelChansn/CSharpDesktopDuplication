@@ -14,7 +14,27 @@ namespace ControlClient1._0.ScreenBitmap
         private ShortPoint cursorPoint;
         private List<ShortRec> difPointsList;
         private RecPacket.BitmapType type;
+        private RecPacket.PacketType packetType;
+        private String stringValue;
 
+
+        public void setStringValue(String stringValue)
+        {
+            this.stringValue = stringValue;
+        }
+        public String getStringValue()
+        {
+           return this.stringValue;
+        }
+
+        public void setPacketType(RecPacket.PacketType packetType)
+        {
+            this.packetType = packetType;
+        }
+        public RecPacket.PacketType getPacketType()
+        {
+            return this.packetType;
+        }
         public Bitmap getDifBitmap()
         {
             return this.difBitmap;

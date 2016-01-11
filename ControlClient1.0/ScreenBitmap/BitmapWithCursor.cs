@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ControlClient1._0.ReceivePacket;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -12,7 +13,27 @@ namespace ControlClient1._0.ScreenBitmap
     {
         private ShortPoint cursorPoisiton = null;
         private Bitmap screenBitmap=null;
-        
+        private RecPacket.PacketType packetType;
+        private String stringValue;
+
+
+        public void setStringValue(String stringValue)
+        {
+            this.stringValue = stringValue;
+        }
+        public String getStringValue()
+        {
+            return this.stringValue;
+        }
+
+        public void setPacketType(RecPacket.PacketType packetType)
+        {
+            this.packetType = packetType;
+        }
+        public RecPacket.PacketType getPacketType()
+        {
+            return this.packetType;
+        }
 
         public void setCursorPoint(ShortPoint point)
         {

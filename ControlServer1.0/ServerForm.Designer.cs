@@ -31,6 +31,7 @@ namespace ControlServer1._0
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ServerForm));
             this.buttonClose = new System.Windows.Forms.Button();
             this.panelTop = new System.Windows.Forms.Panel();
             this.labelTop = new System.Windows.Forms.Label();
@@ -371,6 +372,7 @@ namespace ControlServer1._0
             this.Controls.Add(this.buttonClose);
             this.Controls.Add(this.panelTop);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "ServerForm";
             this.Text = "Form1";
             this.panelTop.ResumeLayout(false);

@@ -63,7 +63,7 @@ namespace ControlClient1._0
         private static BlockingQueue<DifferentBitmapWithCursor> deCompressDifQueue = new BlockingQueue<DifferentBitmapWithCursor>(10);
 
         /**大小为10的复原队列*/
-        private static BlockingQueue<BitmapWithCursor> screenCopyQueue = new BlockingQueue<BitmapWithCursor>(10);
+        private static BlockingQueue<BitmapWithCursor> displayQueue = new BlockingQueue<BitmapWithCursor>(10);
 
 
 
@@ -173,46 +173,68 @@ namespace ControlClient1._0
                 try
                 {
                     RecPacket recpacket = new RecPacket();
-
-                    int bitmapBytesLen = reader.ReadInt32();
-                    RecPacket.BitmapType type = (RecPacket.BitmapType)reader.ReadByte();
-                    short cursorPointX = reader.ReadInt16();
-                    short cursorpointY = reader.ReadInt16();
-                    short difNum = reader.ReadInt16();
-                    if (difNum > 0)
+                    RecPacket.PacketType packetType = (RecPacket.PacketType)reader.ReadByte();
+                    recpacket.setPacketType(packetType);
+                    switch (packetType)
                     {
-                        List<ShortRec> difPoints = new List<ShortRec>();
-                        for (int i = 0; i < difNum; i++)
-                        {
-                            short xpoint = reader.ReadInt16();
-                            short ypoint = reader.ReadInt16();
-                            short width = reader.ReadInt16();
-                            short height = reader.ReadInt16();
-                            ShortRec difPoint = new ShortRec(xpoint, ypoint,width,height);
-                            difPoints.Add(difPoint);
+                        case RecPacket.PacketType.BITMAP:
+                                int bitmapBytesLen = reader.ReadInt32();
+                                RecPacket.BitmapType type = (RecPacket.BitmapType)reader.ReadByte();
+                                short cursorPointX = reader.ReadInt16();
+                                short cursorpointY = reader.ReadInt16();
+                                short difNum = reader.ReadInt16();
+                                if (difNum > 0)
+                                {
+                                    List<ShortRec> difPoints = new List<ShortRec>();
+                                    for (int i = 0; i < difNum; i++)
+                                    {
+                                        short xpoint = reader.ReadInt16();
+                                        short ypoint = reader.ReadInt16();
+                                        short width = reader.ReadInt16();
+                                        short height = reader.ReadInt16();
+                                        ShortRec difPoint = new ShortRec(xpoint, ypoint,width,height);
+                                        difPoints.Add(difPoint);
 
-                        }
-                        recpacket.setDifPointsList(difPoints);
+                                    }
+                                    recpacket.setDifPointsList(difPoints);
 
+                                }
+                                int size = 0;
+                                byte[] getBitmapBytes = new byte[bitmapBytesLen];
+                                while (size < bitmapBytesLen)
+                                {
+                                    size += reader.Read(getBitmapBytes, size, bitmapBytesLen - size);
+                                }
+//                                byte[] getBitmapBytes = reader.ReadBytes(bitmapBytesLen);
+
+                                /**组装数据*/
+                                recpacket.setBitByts(getBitmapBytes);
+                                recpacket.setBitmapBytesLength(bitmapBytesLen);
+                                recpacket.setBitmapType(type);
+                                recpacket.setCursorPoint(new ShortPoint(cursorPointX, cursorpointY));
+                                /**添加到接收队列*/
+                                recPacketQueue.Enqueue(recpacket);
+                                labelQueueCap.Text = "接收队列大小：" + recPacketQueue.getQueueSize()+ "\r\n";
+                            break;
+                        case RecPacket.PacketType.TEXT:
+                                 int textLen = reader.ReadInt32();
+                                 int textSize = 0;
+                                 byte[] getTextBytes = new byte[textLen];
+                                 while (textSize < textLen)
+                                    {
+                                        textSize += reader.Read(getTextBytes, textSize, textLen - textSize);
+                                    }
+                                 recpacket.setStringValue(Encoding.UTF8.GetString(getTextBytes));
+                                 /**添加到接收队列*/
+                                 recPacketQueue.Enqueue(recpacket);
+                                 labelQueueCap.Text = "接收队列大小：" + recPacketQueue.getQueueSize() + "\r\n";
+                            break;
+                        default:
+                            break;
                     }
-                    /*
-                    int size = 0;
-                    byte[] getBitmapBytes = new byte[bitmapBytesLen];
-                    while (size < bitmapBytesLen)
-                    {
-                        size += reader.Read(getBitmapBytes, size, (bitmapBytesLen-2) - size);
-                    }*/
-                    byte[] getBitmapBytes = reader.ReadBytes(bitmapBytesLen);
 
-                    /**组装数据*/
-                    recpacket.setBitByts(getBitmapBytes);
-                    recpacket.setBitmapBytesLength(bitmapBytesLen);
-                    recpacket.setBitmapType(type);
-                    recpacket.setCursorPoint(new ShortPoint(cursorPointX, cursorpointY));
-                    //MessageBox.Show(getBitmapBytes.Length+"");
-                    /**添加到接收队列*/
-                    recPacketQueue.Enqueue(recpacket);
-                    labelQueueCap.Text = "接收队列大小：" + recPacketQueue.getQueueSize()+ "\r\n";
+
+                   
                 }
                 catch (Exception ex)
                 {
@@ -247,43 +269,51 @@ namespace ControlClient1._0
                 RecPacket recPacket = recPacketQueue.Dequeue();
                 if (recPacket != null)
                 {
+                    RecPacket.PacketType packetType = recPacket.getPacketType();
                     DifferentBitmapWithCursor difbitWithCur = new DifferentBitmapWithCursor();
-                    difbitWithCur.setBitmapType(recPacket.getBitmapType());
-                    difbitWithCur.setCursorPoint(recPacket.getCursorPoint());
-                    difbitWithCur.setDifPointsList(recPacket.getDifPointsList());
-                    byte[] dataBytes = recPacket.getBitByts();
-                    //Console.WriteLine(dataBytes.Length);
-
-                    byte[] getByte=new LZOCompressor().Decompress(dataBytes);
-                    Bitmap temp = (Bitmap)Bitmap.FromStream(new MemoryStream(getByte));
-                    difbitWithCur.setDifBitmap(temp);
-                    /*
-                    FileStream fs = File.OpenWrite("D:\\clientZip.zip");
-                    fs.Write(dataBytes,0,dataBytes.Length);
-                    fs.Close();
-                    */
-                    /*
-                    MemoryStream msUnzip = new MemoryStream();
-                    ZipInputStream inZip = new ZipInputStream(new MemoryStream(dataBytes));
-                    inZip.GetNextEntry();
-                    byte[] buf = new byte[8192];
-                    int size = 0;
-                    while (true)
+                    difbitWithCur.setPacketType(packetType);
+                    switch(packetType)
                     {
-                        size = inZip.Read(buf, 0, buf.Length);
-                        if (size == 0) break;
-                        msUnzip.Write(buf, 0, size);
-                    }
-                    //msUnzip.Close();
-                    inZip.CloseEntry();
-                    inZip.Close();
-                    Bitmap btm = new Bitmap(msUnzip,true);
-                    difbitWithCur.setDifBitmap(btm);
-                    */
-                    /**放入差异队列*/
-                    deCompressDifQueue.Enqueue(difbitWithCur);
+                        case RecPacket.PacketType.BITMAP:
+                            difbitWithCur.setBitmapType(recPacket.getBitmapType());
+                            difbitWithCur.setCursorPoint(recPacket.getCursorPoint());
+                            difbitWithCur.setDifPointsList(recPacket.getDifPointsList());
+                            byte[] dataBytes = recPacket.getBitByts();
+                            byte[] getByte=new LZOCompressor().Decompress(dataBytes);
+                            Bitmap temp = (Bitmap)Bitmap.FromStream(new MemoryStream(getByte));
+                            difbitWithCur.setDifBitmap(temp);
+                            /*
+                            MemoryStream msUnzip = new MemoryStream();
+                            ZipInputStream inZip = new ZipInputStream(new MemoryStream(dataBytes));
+                            inZip.GetNextEntry();
+                            byte[] buf = new byte[8192];
+                            int size = 0;
+                            while (true)
+                            {
+                                size = inZip.Read(buf, 0, buf.Length);
+                                if (size == 0) break;
+                                msUnzip.Write(buf, 0, size);
+                            }
+                            //msUnzip.Close();
+                            inZip.CloseEntry();
+                            inZip.Close();
+                            Bitmap btm = new Bitmap(msUnzip,true);
+                            difbitWithCur.setDifBitmap(btm);
+                            */
+                            /**放入差异队列*/
+                            deCompressDifQueue.Enqueue(difbitWithCur);
+                            labelDif.Text = "差异队列大小：" + deCompressDifQueue.getQueueSize()+ "\r\n";
+                            break;
+                        case RecPacket.PacketType.TEXT:
+                            difbitWithCur.setStringValue(recPacket.getStringValue());
+                            deCompressDifQueue.Enqueue(difbitWithCur);
+                            labelDif.Text = "差异队列大小：" + deCompressDifQueue.getQueueSize()+ "\r\n";
+                            break;
+                        default:
+                            break;
 
-                    labelDif.Text = "差异队列大小：" + deCompressDifQueue.getQueueSize()+ "\r\n";
+                    }
+                   
 
                 }
             }
@@ -307,32 +337,47 @@ namespace ControlClient1._0
                 DifferentBitmapWithCursor difbitWithCur = deCompressDifQueue.Dequeue();
                 if (difbitWithCur != null)
                 {
+                    RecPacket.PacketType packetType = difbitWithCur.getPacketType();
                     BitmapWithCursor bitmapWithCursor = new BitmapWithCursor();
-                    RecPacket.BitmapType type=difbitWithCur.getBitmapType();
-                    ShortPoint cursorpoint = difbitWithCur.getCursorPoint();
-                    Bitmap btm=difbitWithCur.getDifBitmap();
-                    List<ShortRec> difPoints = difbitWithCur.getDifPointsList();
-                    switch (type)
+                    bitmapWithCursor.setPacketType(packetType);
+                    switch (packetType)
                     {
-                        case RecPacket.BitmapType.BLOCK:
-                            //Stopwatch sw = new Stopwatch();
-                            //sw.Start();
-                            Bitmap recBitmap = RecoverBitmap.recoverScreenBitmap(difPoints, globalCompareBitmap, btm/*, bitCmpSize*/);
-                            //sw.Stop();
-                            //Console.WriteLine("client:"+sw.ElapsedMilliseconds+"ms");
-                            bitmapWithCursor.setCursorPoint(cursorpoint);
-                            bitmapWithCursor.setScreenBitmap(recBitmap);
-                            globalCompareBitmap = (Bitmap)recBitmap.Clone();
-                            /**放到显示队列*/
-                            screenCopyQueue.Enqueue(bitmapWithCursor);
+                        case RecPacket.PacketType.BITMAP:
+                            RecPacket.BitmapType type=difbitWithCur.getBitmapType();
+                            ShortPoint cursorpoint = difbitWithCur.getCursorPoint();
+                            Bitmap btm=difbitWithCur.getDifBitmap();
+                            List<ShortRec> difPoints = difbitWithCur.getDifPointsList();
+                            switch (type)
+                            {
+                                case RecPacket.BitmapType.BLOCK:
+                                    //Stopwatch sw = new Stopwatch();
+                                    //sw.Start();
+                                    Bitmap recBitmap = RecoverBitmap.recoverScreenBitmap(difPoints, globalCompareBitmap, btm/*, bitCmpSize*/);
+                                    //sw.Stop();
+                                    //Console.WriteLine("client:"+sw.ElapsedMilliseconds+"ms");
+                                    bitmapWithCursor.setCursorPoint(cursorpoint);
+                                    bitmapWithCursor.setScreenBitmap(recBitmap);
+                                    globalCompareBitmap = (Bitmap)recBitmap.Clone();
+                                    /**放到显示队列*/
+                                    displayQueue.Enqueue(bitmapWithCursor);
+                                    break;
+                                case RecPacket.BitmapType.COMPLETE:
+                                    updateKeyFrame(btm, cursorpoint);
+                                    break;
+                                default:
+                                    break;
+                            }
+                            labeldispalyQueue.Text = "显示队列大小：" + displayQueue.getQueueSize()+ "\r\n";
                             break;
-                        case RecPacket.BitmapType.COMPLETE:
-                            updateKeyFrame(btm, cursorpoint);
+                        case RecPacket.PacketType.TEXT:
+                            bitmapWithCursor.setStringValue(difbitWithCur.getStringValue());
+                            displayQueue.Enqueue(bitmapWithCursor);
+                            labeldispalyQueue.Text = "显示队列大小：" + displayQueue.getQueueSize() + "\r\n";
                             break;
                         default:
                             break;
                     }
-                    labeldispalyQueue.Text = "显示队列大小：" + screenCopyQueue.getQueueSize()+ "\r\n";
+                   
 
 
                 }
@@ -349,10 +394,11 @@ namespace ControlClient1._0
             {
                 globalCompareBitmap = (Bitmap)btm.Clone();
                 BitmapWithCursor bitmapWithCursor = new BitmapWithCursor();
+                bitmapWithCursor.setPacketType(RecPacket.PacketType.BITMAP);
                 bitmapWithCursor.setCursorPoint(cursorPoint);
                 bitmapWithCursor.setScreenBitmap(btm);
                /**添加到队列*/
-                screenCopyQueue.Enqueue(bitmapWithCursor);
+                displayQueue.Enqueue(bitmapWithCursor);
             }
         }
 
@@ -362,20 +408,34 @@ namespace ControlClient1._0
         {
             while (isConnect)
             {
-                BitmapWithCursor bitmapWithCursor = screenCopyQueue.Dequeue();
+                BitmapWithCursor bitmapWithCursor = displayQueue.Dequeue();
                 if (bitmapWithCursor != null)
                 {
-                    Bitmap display = bitmapWithCursor.getScreenBitmap();
-                    Point cursorPoint = new Point(bitmapWithCursor.getCursorPoint().getXPoint(), bitmapWithCursor.getCursorPoint().getYPoint());
-                    using (Graphics g = Graphics.FromImage(bitmapWithCursor.getScreenBitmap()))
+                    RecPacket.PacketType packetType = bitmapWithCursor.getPacketType();
+                    switch (packetType)
                     {
-                        Cursor myCursor = Cursor.Current;
+                        case RecPacket.PacketType.BITMAP:
+                            Bitmap display = bitmapWithCursor.getScreenBitmap();
+                            Point cursorPoint = new Point(bitmapWithCursor.getCursorPoint().getXPoint(), bitmapWithCursor.getCursorPoint().getYPoint());
+                            using (Graphics g = Graphics.FromImage(bitmapWithCursor.getScreenBitmap()))
+                            {
+                                Cursor myCursor = Cursor.Current;
 
-                        myCursor.Draw(g, new Rectangle(cursorPoint, new Size(10, 10)));
-                        g.Dispose();
+                                myCursor.Draw(g, new Rectangle(cursorPoint, new Size(10, 10)));
+                                g.Dispose();
+                            }
+                            pictureBoxRec.BackgroundImage = display;
+                            labeldispalyQueue.Text = "显示队列大小：" + displayQueue.getQueueSize()+ "\r\n";
+                            break;
+                        case RecPacket.PacketType.TEXT:
+                            textBoxInfo.Text = bitmapWithCursor.getStringValue();
+                            labeldispalyQueue.Text = "显示队列大小：" + displayQueue.getQueueSize() + "\r\n";
+                            break;
+                        default:
+                            break;
+
                     }
-                    pictureBoxRec.BackgroundImage = display;
-                    labeldispalyQueue.Text = "显示队列大小：" + screenCopyQueue.getQueueSize()+ "\r\n";
+                   
                 }
                
  
