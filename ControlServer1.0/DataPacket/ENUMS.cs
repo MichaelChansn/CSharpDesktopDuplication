@@ -144,8 +144,7 @@ namespace ControlServer1._0.DataPacket
 
         *****************************************************************************************/
 
-        public enum 
-            MESSAGETYPE : byte
+        public enum  MESSAGETYPE : byte
         {
             /**connection infos*/
             HOST_NANME = (byte)0x00,//client host name
@@ -265,6 +264,10 @@ namespace ControlServer1._0.DataPacket
 
             CAPSLOCK = (byte)0x21,
         }
+
+
+        public const String UDPSCANMESSAGE = "在不在啊？请回答。。。";
+        public const Char NETSEPARATOR = '+';
         #endregion
     }
 }

@@ -23,12 +23,13 @@ using ControlServer1._0.BitmapTools;
 using ICSharpCode.SharpZipLib.Zip;
 using DesktopDuplication;
 using ControlServer1._0.OSInfos;
+using ControlServer1._0.CommandProcess;
 
 namespace ControlServer1._0
 {
     public partial class ServerForm : Form
     {
-        private static int PORT = 8888;
+        private static int TCP_PORT = 8888;
         private static Socket serverSocket = null;
         private static Socket clientSocket = null;
         private static Thread serverSocketThread = null;//服务器等待连接线程
@@ -41,6 +42,9 @@ namespace ControlServer1._0
         private static Thread sendPacketThread = null;//数据发送线程
         private static Thread recPacketThread = null;//数据接收线程
 
+        private static int UDP_PORT = 9999;
+        private static Thread DUPScanThread = null;
+        private static UdpClient udpClient=null;
 
         private static bool isServerRun = false;
         private static bool isClientRun = false;
@@ -70,13 +74,73 @@ namespace ControlServer1._0
             Console.WriteLine("system is win8 above:" + isWin8Above);
         }
 
+        private void stopUDP()
+        {
+            if (DUPScanThread != null)
+            {
+                DUPScanThread.Interrupt();
+                DUPScanThread.Abort();
+            }
+            if (udpClient != null)
+            {
+                udpClient.Close();
+                udpClient = null;
+            }
+        }
+        private void startUDPReceiverThread()
+        {
+            DUPScanThread = new Thread(udpReceive);
+            DUPScanThread.IsBackground = true;
+            DUPScanThread.Priority = ThreadPriority.Lowest;
+            DUPScanThread.Start();
+        }
+        void udpReceive()
+        {
+            udpClient = new UdpClient(UDP_PORT);
+            IPEndPoint RemoteIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
+            while (isServerRun)
+            {
+                try
+                {
+                    Byte[] receiveBytes = udpClient.Receive(ref RemoteIpEndPoint);//这个方法是阻塞的
+                    string returnData = Encoding.UTF8.GetString(receiveBytes);
+                    string[] rec = returnData.Split(ENUMS.NETSEPARATOR);
+
+                    if (rec[0] == ENUMS.UDPSCANMESSAGE)
+                    {
+                        Console.WriteLine("get a udp client:" + rec[1] + ":" + RemoteIpEndPoint.ToString());
+                        byte[] buf = Encoding.UTF8.GetBytes(System.Environment.MachineName + ENUMS.NETSEPARATOR + TCP_PORT);
+                        udpClient.Send(buf, buf.Length);
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    if (udpClient != null)
+                    {
+                        udpClient.Close();
+                        udpClient = null;
+                    }
+                    return;
+                }
+
+
+            }
+            if (udpClient != null)
+            {
+                udpClient.Close();
+                udpClient = null;
+            }
+        }
         private void buttonServer_Click(object sender, EventArgs e)
         {
             if (!isServerRun)
             {
                 isServerRun = true;
+                startUDPReceiverThread();
                 serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                serverSocket.Bind(new IPEndPoint(IPAddress.Any, PORT));
+                serverSocket.Bind(new IPEndPoint(IPAddress.Any, TCP_PORT));
                 serverSocket.Blocking = true;
                 serverSocket.Listen(5);
 
@@ -95,6 +159,7 @@ namespace ControlServer1._0
             else
             {
                 isServerRun = false;
+                stopUDP();
                 buttonServer.Text = "START SERVER";
                 textBoxHost.Text = "SERVER IS CLOSE...";
                 textBoxAddr.Text = "";
@@ -116,6 +181,10 @@ namespace ControlServer1._0
 
         }
 
+        public void setMessageHost(String message)
+        {
+            textBoxHost.Text = message;
+        }
         /**
          * 服务线程，用来接收链接
          */
@@ -128,7 +197,7 @@ namespace ControlServer1._0
                     Socket client = ((Socket)serverSocket).Accept();
                     if (clientSocket != null)
                     {
-                        stopClient(clientSocket);
+                        stopClient();
 
                     }
                     clientSocket = client;
@@ -185,20 +254,19 @@ namespace ControlServer1._0
             BinaryReader reader = new BinaryReader(stream);
             while (isClientRun)
             {
-                //TODO
                 try
                 {
-                    Thread.Sleep(5000);
-
+                    ENUMS.MESSAGETYPE messageType = (ENUMS.MESSAGETYPE)reader.ReadByte();
+                    CmdProcess.processCmd(this,reader, messageType);
                 }
-                catch (ThreadInterruptedException ex)
+                catch (Exception ex)
                 {
+                    Console.WriteLine("readThread:client is off line");
+                    stopClient();/**clean socket*/
                     Console.WriteLine(ex.Message);
-                    ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message);
-                    isClientRun = false;
-                    return;
+                    ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message + "\r\n" + ex.StackTrace + "\r\n");
                 }
-
+                
             }
 
         }
@@ -265,8 +333,8 @@ namespace ControlServer1._0
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine("client is off line");
-                        stopClient(client);/**clean socket*/
+                        Console.WriteLine("sendThread:client is off line");
+                        stopClient();/**clean socket*/
                         Console.WriteLine(ex.Message);
                         ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message + "\r\n" + ex.StackTrace + "\r\n");
                     }
@@ -287,7 +355,7 @@ namespace ControlServer1._0
 
         }
         /**开始发送截图，流水线开始工作*/
-        private void startSendPic()
+        public  void startSendPic()
         {
             isSendPic = true;
             /*3*截屏线程*/
@@ -310,7 +378,7 @@ namespace ControlServer1._0
 
         }
         /**停止发送截图，流水线停止工作*/
-        private void stopSendPic()
+        public void stopSendPic()
         {
 
             isSendPic = false;
@@ -320,7 +388,7 @@ namespace ControlServer1._0
             {
                 copyScreenThread.Interrupt();
                 copyScreenThread.Abort();
-                if(compressThread!=null)
+                if (copyScreenThread != null)
                 copyScreenThread.Join();
                 copyScreenThread = null;
             }
@@ -568,7 +636,7 @@ namespace ControlServer1._0
         }
 
 
-        private void stopClient(Socket client)
+        public void stopClient()
         {
             isClientRun = false;
             isSendPic = false;
@@ -623,7 +691,7 @@ namespace ControlServer1._0
             }
             if (clientSocket != null)
             {
-                stopClient(clientSocket);
+                stopClient();
             }
             isServerRun = false;
             if (serverSocketThread != null)

@@ -35,11 +35,11 @@
             this.labeldispalyQueue = new System.Windows.Forms.Label();
             this.labelDif = new System.Windows.Forms.Label();
             this.labelQueueCap = new System.Windows.Forms.Label();
-            this.labelFps = new System.Windows.Forms.Label();
             this.textBoxInfo = new System.Windows.Forms.TextBox();
             this.textBoxIP = new System.Windows.Forms.TextBox();
             this.buttonConnect = new System.Windows.Forms.Button();
             this.timerGC = new System.Windows.Forms.Timer(this.components);
+            this.button1 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxRec)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -72,10 +72,10 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.button1);
             this.groupBox2.Controls.Add(this.labeldispalyQueue);
             this.groupBox2.Controls.Add(this.labelDif);
             this.groupBox2.Controls.Add(this.labelQueueCap);
-            this.groupBox2.Controls.Add(this.labelFps);
             this.groupBox2.Controls.Add(this.textBoxInfo);
             this.groupBox2.Controls.Add(this.textBoxIP);
             this.groupBox2.Controls.Add(this.buttonConnect);
@@ -120,26 +120,15 @@
             this.labelQueueCap.TabIndex = 4;
             this.labelQueueCap.Text = "接收队列大小";
             // 
-            // labelFps
-            // 
-            this.labelFps.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
-            this.labelFps.AutoSize = true;
-            this.labelFps.Font = new System.Drawing.Font("宋体", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.labelFps.ForeColor = System.Drawing.SystemColors.Highlight;
-            this.labelFps.Location = new System.Drawing.Point(392, 38);
-            this.labelFps.Name = "labelFps";
-            this.labelFps.Size = new System.Drawing.Size(52, 14);
-            this.labelFps.TabIndex = 3;
-            this.labelFps.Text = "耗时：";
-            // 
             // textBoxInfo
             // 
             this.textBoxInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
-            this.textBoxInfo.Location = new System.Drawing.Point(202, 14);
-            this.textBoxInfo.Multiline = true;
+            this.textBoxInfo.Font = new System.Drawing.Font("宋体", 11F);
+            this.textBoxInfo.Location = new System.Drawing.Point(225, 21);
             this.textBoxInfo.Name = "textBoxInfo";
-            this.textBoxInfo.Size = new System.Drawing.Size(184, 68);
+            this.textBoxInfo.Size = new System.Drawing.Size(225, 24);
             this.textBoxInfo.TabIndex = 2;
+            this.textBoxInfo.TextChanged += new System.EventHandler(this.textBoxInfo_TextChanged);
             // 
             // textBoxIP
             // 
@@ -170,6 +159,16 @@
             this.timerGC.Interval = 20;
             this.timerGC.Tick += new System.EventHandler(this.timerGC_Tick);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(225, 50);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(225, 29);
+            this.button1.TabIndex = 5;
+            this.button1.Text = "发送命令";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // ClientForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -195,11 +194,11 @@
         private System.Windows.Forms.TextBox textBoxIP;
         private System.Windows.Forms.Button buttonConnect;
         private System.Windows.Forms.TextBox textBoxInfo;
-        private System.Windows.Forms.Label labelFps;
         private System.Windows.Forms.Label labelQueueCap;
         private System.Windows.Forms.Label labeldispalyQueue;
         private System.Windows.Forms.Label labelDif;
         private System.Windows.Forms.Timer timerGC;
+        private System.Windows.Forms.Button button1;
     }
 }
 

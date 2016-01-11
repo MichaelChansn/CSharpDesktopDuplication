@@ -1,4 +1,5 @@
 ﻿using ControlClient1._0.BitmapTools;
+using ControlClient1._0.DataPacket;
 using ControlClient1._0.ErrorMessage;
 using ControlClient1._0.ReceivePacket;
 using ControlClient1._0.ScreenBitmap;
@@ -65,7 +66,8 @@ namespace ControlClient1._0
         /**大小为10的复原队列*/
         private static BlockingQueue<BitmapWithCursor> displayQueue = new BlockingQueue<BitmapWithCursor>(10);
 
-
+        private static NetworkStream streamW =null; 
+        private static BinaryWriter writer = null;
 
        
        
@@ -253,8 +255,8 @@ namespace ControlClient1._0
         private void sendPacketFun(object client)
         {
            
-            NetworkStream stream = new NetworkStream((Socket)client);
-            BinaryWriter writer = new BinaryWriter(stream);
+             streamW = new NetworkStream((Socket)client);
+             writer = new BinaryWriter(streamW);
             //TODO
 
         }
@@ -447,6 +449,63 @@ namespace ControlClient1._0
         private void timerGC_Tick(object sender, EventArgs e)
         {
             GC.Collect();
-        }  
+        }
+
+        private void textBoxInfo_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        /**
+         * message format:type+value;
+         * eg:0+hello
+         */
+       
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (isConnect)
+            {
+                
+                String message = textBoxInfo.Text;
+                String[] cmds = message.Split('+');
+                if (cmds.Length == 1)
+                {
+                    byte messageType = Byte.Parse(cmds[0]);
+                    writer.Write(messageType);
+                    writer.Flush();
+                }
+                else if (cmds.Length == 2)
+                {
+                    byte messageType = Byte.Parse(cmds[0]);
+                    int textLen = cmds[1].Length;
+                    writer.Write(messageType);
+                    writer.Write(small2Big(textLen));
+                    writer.Write(Encoding.UTF8.GetBytes(cmds[1]));
+                    writer.Flush();
+                } if (cmds.Length == 3)
+                {
+                    byte messageType = Byte.Parse(cmds[0]);
+                    int intValue1 = Convert.ToInt32(cmds[1]);
+                    int intValue2 = Convert.ToInt32(cmds[2]);
+                    writer.Write(messageType);
+                    writer.Write(small2Big(intValue1));
+                    writer.Write(small2Big(intValue2));
+                    writer.Flush();
+                }
+
+                
+
+            }
+        }
+        private static int small2Big(int bigInt)
+        {
+            int ret = 0;
+            byte b1 = (byte)(bigInt & 0x000000ff);
+            byte b2 = (byte)((bigInt >> 8) & 0x000000ff);
+            byte b3 = (byte)((bigInt >> 16) & 0x000000ff);
+            byte b4 = (byte)((bigInt >> 24) & 0x000000ff);
+            ret = ((b1 & 0x000000ff) << 24) | ((b2 & 0x000000ff) << 16) | ((b3 & 0x000000ff) << 8) | (b4 & 0x000000ff);
+            return ret;
+        }
     }
 }

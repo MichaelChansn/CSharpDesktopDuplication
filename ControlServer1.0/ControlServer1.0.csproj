@@ -89,6 +89,7 @@
     <Compile Include="BitmapTools\BitmapCmp32Bit.cs" />
     <Compile Include="BitmapTools\GetDifBlocks.cs" />
     <Compile Include="BitmapTools\JpegZip.cs" />
+    <Compile Include="CommandProcess\CmdProcess.cs" />
     <Compile Include="CopyScreenAndBitmapTools\Compress2JepgWithQty.cs" />
     <Compile Include="CopyScreenAndBitmapTools\CopyScreen.cs" />
     <Compile Include="DataPacket\ENUMS.cs" />
