@@ -256,6 +256,7 @@ namespace ControlServer1._0
             BinaryReader reader = new BinaryReader(stream);
             while (isClientRun)
             {
+                Console.WriteLine("recPacketThread***********");
                 try
                 {
                     ENUMS.MESSAGETYPE messageType = (ENUMS.MESSAGETYPE)reader.ReadByte();
@@ -287,7 +288,7 @@ namespace ControlServer1._0
                 SendPacket sendpacket = sendPacketQueue.Dequeue();
                 if (sendpacket != null)
                 {
-
+                    Console.WriteLine("sendPacketThread***********");
                     try
                     {
                         SendPacket.PacketType packetType = sendpacket.getPacketType();
@@ -431,7 +432,7 @@ namespace ControlServer1._0
                 try
                 {
                     Thread.Sleep(dynamicTime);
-
+                    Console.WriteLine("screenCopyThread***********");
                     if (isWin8Above)//above win8 version
                     {
                         /**采用DXGI形式获取桌面，只能使用在win8以上系统，效率比较高，用来代替Mirror Driver*/
@@ -507,6 +508,7 @@ namespace ControlServer1._0
 
                 if (bitmapWithCursor != null)
                 {
+                    Console.WriteLine("btmCmpThread***********");
                     try
                     {
                         //发送关键帧，校准
@@ -611,6 +613,7 @@ namespace ControlServer1._0
                 DifferentBitmapWithCursor differentBitmapWithCursor = screenCopyDifQueue.Dequeue();
                 if (differentBitmapWithCursor != null)
                 {
+                    Console.WriteLine("compressThread***********");
                     try
                     {
 
@@ -747,7 +750,9 @@ namespace ControlServer1._0
         {
 
             // stopAllThreads();
-            new Thread(new ThreadStart(stopAllThreads)).Start();
+            this.Controls.Clear();
+            this.Close();
+            stopAllThreads();
             Application.Exit();
         }
 

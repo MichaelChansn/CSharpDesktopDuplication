@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
 namespace ControlServer1._0
 {
@@ -19,7 +20,11 @@ namespace ControlServer1._0
             {
                 components.Dispose();
             }
-            base.Dispose(disposing);
+            try
+            {
+                base.Dispose(disposing);
+            }
+            catch(Exception e){}
         }
 
         #region Windows 窗体设计器生成的代码
