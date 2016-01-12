@@ -76,16 +76,18 @@ namespace ControlServer1._0
 
         private void stopUDP()
         {
-            if (DUPScanThread != null)
-            {
-                DUPScanThread.Interrupt();
-                DUPScanThread.Abort();
-            }
             if (udpClient != null)
             {
                 udpClient.Close();
                 udpClient = null;
             }
+            if (DUPScanThread != null)
+            {
+                DUPScanThread.Interrupt();
+                DUPScanThread.Abort();
+                DUPScanThread.Join();
+            }
+           
         }
         private void startUDPReceiverThread()
         {
@@ -104,13 +106,13 @@ namespace ControlServer1._0
                 {
                     Byte[] receiveBytes = udpClient.Receive(ref RemoteIpEndPoint);//这个方法是阻塞的
                     string returnData = Encoding.UTF8.GetString(receiveBytes);
-                    string[] rec = returnData.Split(ENUMS.NETSEPARATOR);
-
-                    if (rec[0] == ENUMS.UDPSCANMESSAGE)
+                    Console.WriteLine(returnData);
+                    string[] rec = returnData.Split(ENUMS.NETSEPARATOR.ToCharArray(),StringSplitOptions.RemoveEmptyEntries);
+                    if (rec[0] == ENUMS.UDPSCANMESSAGE && rec.Length==2)
                     {
-                        Console.WriteLine("get a udp client:" + rec[1] + ":" + RemoteIpEndPoint.ToString());
-                        byte[] buf = Encoding.UTF8.GetBytes(System.Environment.MachineName + ENUMS.NETSEPARATOR + TCP_PORT);
-                        udpClient.Send(buf, buf.Length);
+                        Console.WriteLine(rec[1] + ":" + RemoteIpEndPoint.ToString());
+                        byte[] buf = Encoding.UTF8.GetBytes(ENUMS.UDPSCANRETURN+ENUMS.NETSEPARATOR+System.Environment.UserName + ENUMS.NETSEPARATOR + TCP_PORT);
+                        udpClient.Send(buf, buf.Length, RemoteIpEndPoint);
 
                     }
                 }

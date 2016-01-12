@@ -266,8 +266,9 @@ namespace ControlServer1._0.DataPacket
         }
 
 
-        public const String UDPSCANMESSAGE = "在不在啊？请回答。。。";
-        public const Char NETSEPARATOR = '+';
+        public const String UDPSCANMESSAGE = "哥们，在不在啊？";
+        public const String UDPSCANRETURN = "在啊，大哥，咋啦？";
+        public const String NETSEPARATOR = "<##>";
         #endregion
     }
 }
