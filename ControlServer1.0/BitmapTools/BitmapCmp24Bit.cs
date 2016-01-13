@@ -26,8 +26,10 @@ namespace ControlServer1._0.BitMapComparer
             [FieldOffset(2)]
             public byte R;
         }
-        private static int BOTTOMLINE = 12;//颜色阀值，低于此值认为是相同的像素
-        private static int SCANSTRIDE = 3;//隔行扫描，每隔3行/列，扫描一次
+        [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
+        private static extern unsafe int memcmp(byte* b1, byte* b2, int count);
+        private static int BOTTOMLINE = 8;//颜色阀值，低于此值认为是相同的像素
+        private static int SCANSTRIDE = 2;//隔行扫描，每隔3行/列，扫描一次
         /// <summary>
         /// 比较两个图像
         /// </summary>
@@ -48,6 +50,43 @@ namespace ControlServer1._0.BitMapComparer
             {
                 unsafe
                 {
+                    /*
+                    int w = 0, h = 0;
+                    int start = new Random().Next(0, SCANSTRIDE);
+                    while (h < bd1.Height && h < bd2.Height)
+                    {
+                        byte* p1 = (byte*)bd1.Scan0 + h * bd1.Stride;
+                        byte* p2 = (byte*)bd2.Scan0 + h * bd2.Stride;
+                        w = 0;
+                        while (w < bd1.Width && w < bd2.Width)
+                        {
+                            for (int j = start; j < block.Height; j += SCANSTRIDE)
+                            {
+                                int hj = h + j;
+                                if (hj >= bd1.Height || hj >= bd2.Height) break;
+
+                                byte* pc1 = p1 + j * bd1.Stride + w * 3;
+                                byte* pc2 = p2 + j * bd1.Stride + w * 3;
+                                if (memcmp(pc1, pc2, Math.Min(block.Width, bd1.Width - w) * 4) != 0)
+                                {
+                                    int bw = Math.Min(block.Width, bd1.Width - w);
+                                    int bh = Math.Min(block.Height, bd1.Width - h);
+                                    rects.Add(new ShortRec(w, h, bw, bh));
+                                    break;
+                                }
+                                
+                            }
+                            w += block.Width;
+                        }
+
+
+                        h += block.Height;
+                    }
+
+                    */
+
+
+
                     int w = 0, h = 0;
                     int start = new Random().Next(0, SCANSTRIDE);//确定随机监测点，保证随机探测
 

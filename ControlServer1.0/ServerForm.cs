@@ -256,7 +256,7 @@ namespace ControlServer1._0
             BinaryReader reader = new BinaryReader(stream);
             while (isClientRun)
             {
-                Console.WriteLine("recPacketThread***********");
+                //Console.WriteLine("recPacketThread***********");
                 try
                 {
                     ENUMS.MESSAGETYPE messageType = (ENUMS.MESSAGETYPE)reader.ReadByte();
@@ -288,7 +288,7 @@ namespace ControlServer1._0
                 SendPacket sendpacket = sendPacketQueue.Dequeue();
                 if (sendpacket != null)
                 {
-                    Console.WriteLine("sendPacketThread***********");
+                   // Console.WriteLine("sendPacketThread***********");
                     try
                     {
                         SendPacket.PacketType packetType = sendpacket.getPacketType();
@@ -432,7 +432,7 @@ namespace ControlServer1._0
                 try
                 {
                     Thread.Sleep(dynamicTime);
-                    Console.WriteLine("screenCopyThread***********");
+                   // Console.WriteLine("screenCopyThread***********");
                     if (isWin8Above)//above win8 version
                     {
                         /**采用DXGI形式获取桌面，只能使用在win8以上系统，效率比较高，用来代替Mirror Driver*/
@@ -496,7 +496,7 @@ namespace ControlServer1._0
          * 广域网一般40*40 或 20*20
          * 是否需要协商块的大小？？？？进一步实验决定。默认的事30*30
          **/
-        private static Size bitCmpSize = new Size(30, 30);
+        private static Size bitCmpSize =new Size(16,16);// new Size(30, 30);
         private static bool isFirstFrame = true;//用于第一比较帧的保存
         private static int keyFrameAdjusttimes = 0;
         private static double VPT07 = 0.7;
@@ -508,7 +508,7 @@ namespace ControlServer1._0
 
                 if (bitmapWithCursor != null)
                 {
-                    Console.WriteLine("btmCmpThread***********");
+                   // Console.WriteLine("btmCmpThread***********");
                     try
                     {
                         //发送关键帧，校准
@@ -531,7 +531,12 @@ namespace ControlServer1._0
                             List<ShortRec> difPoints = null;
                             if (isWin8Above)
                             {
+
+                               // Stopwatch sw = new Stopwatch();
+                                //sw.Start();
                                 difPoints = BitmapCmp32Bit.Compare(bitmapWithCursor.dirtyRecs, btm2, btm1, bitCmpSize);
+                                //sw.Stop();
+                                //Console.WriteLine(sw.ElapsedMilliseconds+"ms");
                             }
                             else
                             {
@@ -613,7 +618,7 @@ namespace ControlServer1._0
                 DifferentBitmapWithCursor differentBitmapWithCursor = screenCopyDifQueue.Dequeue();
                 if (differentBitmapWithCursor != null)
                 {
-                    Console.WriteLine("compressThread***********");
+                   // Console.WriteLine("compressThread***********");
                     try
                     {
 

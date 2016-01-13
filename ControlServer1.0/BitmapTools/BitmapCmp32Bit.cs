@@ -30,8 +30,10 @@ namespace ControlServer1._0.BitmapTools
             [FieldOffset(3)]
             public byte A;
         }
-        private static int BOTTOMLINE = 12;//颜色阀值，低于此值认为是相同的像素
-        private static int SCANSTRIDE =3;//隔行扫描，每隔3行/列，扫描一次
+        [DllImport("msvcrt.dll",CallingConvention = CallingConvention.Cdecl)]
+        private static extern unsafe int memcmp(byte* b1, byte* b2, int count);
+        private static int BOTTOMLINE = 8;//颜色阀值，低于此值认为是相同的像素
+        private static int SCANSTRIDE = 2;//隔行扫描，每隔3行/列，扫描一次
 
         /// <summary>
         /// 比较两个图像
@@ -43,6 +45,7 @@ namespace ControlServer1._0.BitmapTools
         /// 
         public static List<ShortRec> Compare(Rectangle[] dirtyRecs, Bitmap globalBtm, Bitmap lastFrame, Size block)
         {
+           // if (globalBtm.Size != lastFrame.Size) return null;
             List<ShortRec> difPoint = new List<ShortRec>();
             PixelFormat pf = PixelFormat.Format32bppArgb;
             Bitmap retBtm = new Bitmap(lastFrame.Width, lastFrame.Height, lastFrame.PixelFormat);
@@ -52,10 +55,50 @@ namespace ControlServer1._0.BitmapTools
 
             try
             {
+
                 unsafe
                 {
-
-
+                    /*
+                    foreach (Rectangle dirRec in dirtyRecs)
+                    {
+                        //新图形坐标
+                        int startX = dirRec.Left;
+                        int startY = dirRec.Top;
+                        int width = dirRec.Width;
+                        int height = dirRec.Height;
+                        int endX = dirRec.Right;
+                        int endY = dirRec.Bottom;
+                        int w = startX, h = startY;
+                        int start = new Random().Next(0, SCANSTRIDE);
+                        while (h < endY)
+                        {
+                            byte* p1 = (byte*)bd1.Scan0 + h * bd1.Stride;
+                            byte* p2 = (byte*)bd2.Scan0 + h * bd2.Stride;
+                             w = startX;
+                             while (w < endX)
+                             {
+                                 for (int j = start; j < block.Height; j += SCANSTRIDE)
+                                 {
+                                     int hj = h + j;
+                                     if (hj >= endY) break;
+                                     byte* pc1 = p1 + j * bd1.Stride + w * 4;
+                                     byte* pc2 = p2 + j * bd1.Stride + w * 4;
+                                     if (memcmp(pc1, pc2, Math.Min(block.Width, endX - w) * 4) != 0)
+                                     {
+                                         int bw = Math.Min(block.Width, endX - w);
+                                         int bh = Math.Min(block.Height, endY - h);
+                                         difPoint.Add(new ShortRec(w, h, bw, bh));
+                                         break;
+                                     }
+                                 }
+                                 w += block.Width;
+                             }
+                             h += block.Height;
+ 
+                        }
+                    }*/
+                    
+                    
                     foreach (Rectangle dirRec in dirtyRecs)
                     {
                         //新图形坐标
@@ -96,8 +139,7 @@ namespace ControlServer1._0.BitmapTools
                                         {
                                             int bw = Math.Min(block.Width, endX - w);
                                             int bh = Math.Min(block.Height, endY - h);
-                                            difPoint.Add(new ShortRec(w, h,bw,bh));
-                                            
+                                            difPoint.Add(new ShortRec(w, h, bw, bh));
                                             //可以继续使用clone()
                                             //bmp1.Clone(new Rectangle(w, h, 19, 19), bmp1.PixelFormat).Save("D:\\test.jpeg", ImageFormat.Jpeg);
                                             goto E;

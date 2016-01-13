@@ -20,7 +20,7 @@ namespace ControlServer1._0.DataPacket
             MOUSE+RIGHT_UP+OK+8           右键抬起
             MOUSE+MOVE+X+Y                鼠标移动XY是相对移动的坐标长度可正可负
             MOUSE+WHEEL+DISTANCE+9        鼠标滚轮滚动DISTANCE是滚动距离正负表示前后滚动
-
+            MOUSE+SET+X+Y                 把鼠标定位到xy坐标
             文字输入信息：
             KEY+VALUE+OK+DONE             得到键盘按键值VALUE，用于输入
 
@@ -172,6 +172,7 @@ namespace ControlServer1._0.DataPacket
             MOUSE_RIGHT_DOUBLE_CLICK = (byte)0x37,
             MOUSE_WHEEL = (byte)0x38,
             MOUSE_MOVE = (byte)0x39,
+            MOUSE_SET=(byte)0x3A,
 
             /**game control*/
             GAME_UP_UP = (byte)0x40,

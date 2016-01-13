@@ -136,8 +136,10 @@ namespace ControlServer1._0.CommandProcess
         {
             try
             {
+                Console.WriteLine(messageType);
                 switch (messageType)
                 {
+                       
                     case ENUMS.MESSAGETYPE.EXIT:
                         mainForm.stopClient();//disconnect socket
                         break;
@@ -317,6 +319,12 @@ namespace ControlServer1._0.CommandProcess
                     case ENUMS.MESSAGETYPE.MOUSE_WHEEL:
                         int wheel = big2Small(reader.ReadInt32());
                         mouse_event(MOUSEEVENTF_WHEEL, 0, 0, wheel, 0);
+                        break;
+                    case ENUMS.MESSAGETYPE.MOUSE_SET:
+                        int xPoint = big2Small(reader.ReadInt32());
+                        int yPoint = big2Small(reader.ReadInt32());
+                        //mouse_event(MOUSEEVENTF_ABSOLUTE, xPoint, yPoint, 0, 0);
+                        SetCursorPos(xPoint, yPoint);
                         break;
                     case ENUMS.MESSAGETYPE.START_PIC:
                         mainForm.startSendPic();
