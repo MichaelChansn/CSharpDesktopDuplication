@@ -23,7 +23,7 @@ namespace ControlServer1._0.CopyScreenAndBitmapTools
     class CopyScreen
     {
         private static Size screenSize = Screen.PrimaryScreen.Bounds.Size;
-        private static DesktopDuplicator desktopDuplicator=null;
+        private  static DesktopDuplicator desktopDuplicator=null;
         public static Size getReslution()
         {
             return Screen.PrimaryScreen.Bounds.Size;
@@ -80,9 +80,19 @@ namespace ControlServer1._0.CopyScreenAndBitmapTools
 
 
         }
+        /*
+        public CopyScreen(int deviceID)
+        {
+            this.desktopDuplicator= new DesktopDuplicator(deviceID);
+        }
+          public CopyScreen()
+        {
+            this.desktopDuplicator= new DesktopDuplicator(0);
+        }*/
         /// <summary>
         /// 静态代码块，进行初始化参数
         /// </summary>
+        /// 
         static CopyScreen()
         {
           try

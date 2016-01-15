@@ -174,38 +174,7 @@ namespace ControlServer1._0.DataPacket
             MOUSE_MOVE = (byte)0x39,
             MOUSE_SET=(byte)0x3A,
 
-            /**game control*/
-            GAME_UP_UP = (byte)0x40,
-            GAME_UP_DOWN = (byte)0x41,
-            GAME_DOWN_UP = (byte)0x42,
-            GAME_DOWN_DOWN = (byte)0x43,
-            GAME_LEFT_UP = (byte)0x44,
-            GAME_LEFT_DOWN = (byte)0x45,
-            GAME_RIGHT_UP = (byte)0x46,
-            GAME_RIGHT_DOWN = (byte)0x47,
-
-            GAME_A_UP = (byte)0x48,
-            GAME_A_DOWN = (byte)0x49,
-            GAME_B_UP = (byte)0x4A,
-            GAME_B_DOWN = (byte)0x4B,
-            GAME_C_UP = (byte)0x4C,
-            GAME_C_DOWN = (byte)0x4D,
-            GAME_D_UP = (byte)0x4E,
-            GAME_D_DOWN = (byte)0x4F,
-
-            GAME_START_UP = (byte)0x50,
-            GAME_START_DOWN = (byte)0x51,
-            GAME_STOP_UP = (byte)0x52,
-            GAME_STOP_DOWN = (byte)0x53,
-
-            GAME_OTHER1_UP = (byte)0x54,
-            GAME_OTHER1_DOWN = (byte)0x55,
-            GAME_OTHER2_UP = (byte)0x56,
-            GAME_OTHER2_DOWN = (byte)0x57,
-            GAME_OTHER3_UP = (byte)0x58,
-            GAME_OTHER3_DOWN = (byte)0x59,
-            GAME_OTHER4_UP = (byte)0x5A,
-            GAME_OTHER4_DOWN = (byte)0x5B,
+          
 
             /**control PC funs*/
             FUN_SHUTDOWN = (byte)0x60,
@@ -264,6 +233,24 @@ namespace ControlServer1._0.DataPacket
             ARROW_RIGHT = (byte)0x20,
 
             CAPSLOCK = (byte)0x21,
+            /**game control*/
+            GAME_UP = (byte)0x22,
+            GAME_DOWN = (byte)0x23,
+            GAME_LEFT = (byte)0x24,
+            GAME_RIGHT = (byte)0x25,
+
+            GAME_A = (byte)0x26,
+            GAME_B = (byte)0x27,
+            GAME_C = (byte)0x28,
+            GAME_D = (byte)0x29,
+
+            GAME_START = (byte)0x2A,
+            GAME_STOP = (byte)0x2B,
+
+            GAME_OTHER1 = (byte)0x2C,
+            GAME_OTHER2 = (byte)0x2D,
+            GAME_OTHER3 = (byte)0x2E,
+            GAME_OTHER4 = (byte)0x2F,
         }
 
 

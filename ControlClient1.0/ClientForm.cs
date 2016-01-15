@@ -106,6 +106,7 @@ namespace ControlClient1._0
             else
             {
                 isConnect = false;
+                stopRecPic();
                 recPacketThread.Interrupt();
                 sendPacketThread.Interrupt();
                 deCompressThread.Interrupt();
@@ -126,6 +127,7 @@ namespace ControlClient1._0
                 isConnect = true;
                 /**开启各种工作线程*/
 
+                
                 /*1*数据接收线程*/
                 recPacketThread = new Thread(new ParameterizedThreadStart(recPacketFun));
                 recPacketThread.Priority = ThreadPriority.Normal;
@@ -156,7 +158,7 @@ namespace ControlClient1._0
                 displayBitmapThread.IsBackground = true;
                 displayBitmapThread.Start();
 
-
+                startRecPic();
                
                
             
@@ -460,7 +462,21 @@ namespace ControlClient1._0
          * message format:type+value;
          * eg:0+hello
          */
-       
+
+        private void startRecPic()
+        {
+            byte messageType = (byte)0x10;
+            writer.Write(messageType);
+            writer.Flush();
+ 
+        }
+        private void stopRecPic()
+        {
+            byte messageType = (byte)0x11;
+            writer.Write(messageType);
+            writer.Flush();
+
+        }
         private void button1_Click(object sender, EventArgs e)
         {
             if (isConnect)

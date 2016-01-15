@@ -183,90 +183,6 @@ namespace ControlServer1._0.CommandProcess
                     case ENUMS.MESSAGETYPE.FUN_SLEEP:
                         Application.SetSuspendState(PowerState.Hibernate, true, true);
                         break;
-                    case ENUMS.MESSAGETYPE.GAME_A_DOWN:
-                        keybd_event((byte)(A_button), MapVirtualKey((byte)A_button, 0), KEYEVENTF_EXTENDEDKEY | 0, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_A_UP:
-                        keybd_event((byte)(A_button), MapVirtualKey((byte)A_button, 0), KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_B_DOWN:
-                        keybd_event((byte)(B_button), MapVirtualKey((byte)B_button, 0), KEYEVENTF_EXTENDEDKEY | 0, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_B_UP:
-                        keybd_event((byte)(B_button), MapVirtualKey((byte)B_button, 0), KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_C_DOWN:
-                        keybd_event((byte)(C_button), MapVirtualKey((byte)C_button, 0), KEYEVENTF_EXTENDEDKEY | 0, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_C_UP:
-                        keybd_event((byte)(C_button), MapVirtualKey((byte)C_button, 0), KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_D_DOWN:
-                        keybd_event((byte)(D_button), MapVirtualKey((byte)D_button, 0), KEYEVENTF_EXTENDEDKEY | 0, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_D_UP:
-                        keybd_event((byte)(D_button), MapVirtualKey((byte)D_button, 0), KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_DOWN_DOWN:
-                        keybd_event((byte)(down_button), MapVirtualKey((byte)down_button, 0), KEYEVENTF_EXTENDEDKEY | 0, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_DOWN_UP:
-                        keybd_event((byte)(down_button), MapVirtualKey((byte)down_button, 0), KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_LEFT_DOWN:
-                        keybd_event((byte)(left_button), MapVirtualKey((byte)left_button, 0), KEYEVENTF_EXTENDEDKEY | 0, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_LEFT_UP:
-                        keybd_event((byte)(left_button), MapVirtualKey((byte)left_button, 0), KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_OTHER1_DOWN:
-                        keybd_event((byte)(Other1), MapVirtualKey((byte)Other1, 0), KEYEVENTF_EXTENDEDKEY | 0, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_OTHER1_UP:
-                        keybd_event((byte)(Other1), MapVirtualKey((byte)Other1, 0), KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_OTHER2_DOWN:
-                        keybd_event((byte)(Other2), MapVirtualKey((byte)Other2, 0), KEYEVENTF_EXTENDEDKEY | 0, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_OTHER2_UP:
-                        keybd_event((byte)(Other2), MapVirtualKey((byte)Other2, 0), KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_OTHER3_DOWN:
-                        keybd_event((byte)(Other3), MapVirtualKey((byte)Other3, 0), KEYEVENTF_EXTENDEDKEY | 0, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_OTHER3_UP:
-                        keybd_event((byte)(Other3), MapVirtualKey((byte)Other3, 0), KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_OTHER4_DOWN:
-                        keybd_event((byte)(Other4), MapVirtualKey((byte)Other4, 0), KEYEVENTF_EXTENDEDKEY | 0, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_OTHER4_UP:
-                        keybd_event((byte)(Other4), MapVirtualKey((byte)Other4, 0), KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_RIGHT_DOWN:
-                        keybd_event((byte)(right_button), MapVirtualKey((byte)right_button, 0), KEYEVENTF_EXTENDEDKEY | 0, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_RIGHT_UP:
-                        keybd_event((byte)(right_button), MapVirtualKey((byte)right_button, 0), KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_START_DOWN:
-                        keybd_event((byte)(Start), MapVirtualKey((byte)Start, 0), KEYEVENTF_EXTENDEDKEY | 0, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_START_UP:
-                        keybd_event((byte)(Start), MapVirtualKey((byte)Start, 0), KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_STOP_DOWN:
-                        keybd_event((byte)(Stop), MapVirtualKey((byte)Stop, 0), KEYEVENTF_EXTENDEDKEY | 0, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_STOP_UP:
-                        keybd_event((byte)(Stop), MapVirtualKey((byte)Stop, 0), KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_UP_DOWN:
-                        keybd_event((byte)(up_button), MapVirtualKey((byte)up_button, 0), KEYEVENTF_EXTENDEDKEY | 0, 0);
-                        break;
-                    case ENUMS.MESSAGETYPE.GAME_UP_UP:
-                        keybd_event((byte)(up_button), MapVirtualKey((byte)up_button, 0), KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
-                        break;
                     case ENUMS.MESSAGETYPE.HOST_NANME:
                         int len = big2Small(reader.ReadInt32());
                         byte[] message = reader.ReadBytes(len);
@@ -327,10 +243,10 @@ namespace ControlServer1._0.CommandProcess
                         SetCursorPos(xPoint, yPoint);
                         break;
                     case ENUMS.MESSAGETYPE.START_PIC:
-                        mainForm.startSendPic();
+                        mainForm.startSendPicFlags();
                         break;
                     case ENUMS.MESSAGETYPE.STOP_PIC:
-                        mainForm.stopSendPic();
+                        mainForm.stopSendPicFlags();
                         break;
                     case ENUMS.MESSAGETYPE.TEXT:
                         int textLen = big2Small(reader.ReadInt32());
@@ -453,6 +369,48 @@ namespace ControlServer1._0.CommandProcess
                     break;
                 case ENUMS.SPECIALKEYS.WIN:
                     key = (byte)(Keys.LWin);
+                    break;
+                case ENUMS.SPECIALKEYS.GAME_A:
+                    key = (byte)(A_button);
+                    break;
+                case ENUMS.SPECIALKEYS.GAME_B:
+                    key = (byte)(B_button);
+                    break;
+                case ENUMS.SPECIALKEYS.GAME_C:
+                    key = (byte)(C_button);
+                    break;
+                case ENUMS.SPECIALKEYS.GAME_D:
+                    key = (byte)(D_button);
+                    break;
+                case ENUMS.SPECIALKEYS.GAME_DOWN:
+                    key = (byte)(down_button);
+                    break;
+                case ENUMS.SPECIALKEYS.GAME_LEFT:
+                    key = (byte)(left_button);
+                    break;
+                case ENUMS.SPECIALKEYS.GAME_OTHER1:
+                    key = (byte)(Other1);
+                    break;
+                case ENUMS.SPECIALKEYS.GAME_OTHER2:
+                    key = (byte)(Other2);
+                    break;
+                case ENUMS.SPECIALKEYS.GAME_OTHER3:
+                    key = (byte)(Other3);
+                    break;
+                case ENUMS.SPECIALKEYS.GAME_OTHER4:
+                    key = (byte)(Other4);
+                    break;
+                case ENUMS.SPECIALKEYS.GAME_RIGHT:
+                    key = (byte)(right_button);
+                    break;
+                case ENUMS.SPECIALKEYS.GAME_START:
+                    key = (byte)(Start);
+                    break;
+                case ENUMS.SPECIALKEYS.GAME_STOP:
+                    key = (byte)(Stop);
+                    break;
+                case ENUMS.SPECIALKEYS.GAME_UP:
+                    key = (byte)(up_button);
                     break;
                 default:
                     break;
