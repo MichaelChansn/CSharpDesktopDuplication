@@ -23,18 +23,16 @@ namespace ControlServer1._0.CopyScreenAndBitmapTools
     class CopyScreen
     {
         private static Size screenSize = Screen.PrimaryScreen.Bounds.Size;
-        private static DesktopDuplicator desktopDuplicator=null;
+        private  static DesktopDuplicator desktopDuplicator=null;
         public static Size getReslution()
         {
             return Screen.PrimaryScreen.Bounds.Size;
-
         }
         public static  Bitmap getScreenPicWithCursor(Form app)
         {
             try
             {
-
-                Bitmap btm = new Bitmap(screenSize.Width, screenSize.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                Bitmap btm = new Bitmap(screenSize.Width, screenSize.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
                 Graphics g1 = Graphics.FromImage(btm);
                 g1.CopyFromScreen(0, 0, 0, 0, screenSize);//得到屏幕截图
                 int pointx = System.Windows.Forms.Cursor.Position.X;
@@ -67,7 +65,7 @@ namespace ControlServer1._0.CopyScreenAndBitmapTools
            
             try
             {
-                Bitmap btm = new Bitmap(screenSize.Width, screenSize.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                Bitmap btm = new Bitmap(screenSize.Width, screenSize.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
                 Graphics g1 = Graphics.FromImage(btm);
                 g1.CopyFromScreen(0, 0, 0, 0, screenSize);//得到屏幕截图
                 g1.Dispose();
@@ -82,9 +80,19 @@ namespace ControlServer1._0.CopyScreenAndBitmapTools
 
 
         }
+        /*
+        public CopyScreen(int deviceID)
+        {
+            this.desktopDuplicator= new DesktopDuplicator(deviceID);
+        }
+          public CopyScreen()
+        {
+            this.desktopDuplicator= new DesktopDuplicator(0);
+        }*/
         /// <summary>
         /// 静态代码块，进行初始化参数
         /// </summary>
+        /// 
         static CopyScreen()
         {
           try
@@ -97,7 +105,7 @@ namespace ControlServer1._0.CopyScreenAndBitmapTools
             }
         }
         /// <summary>
-        /// 通过DXGI获取桌面图形，只能用于win8以上系统
+        /// 通过DXGI获取桌面图形，只能用于win8以上系统,效果媲美Mirror driver
         /// 返回值有可能是null（超时会返回0），注意判断使用
         /// </summary>
         /// <returns></returns>
@@ -108,9 +116,9 @@ namespace ControlServer1._0.CopyScreenAndBitmapTools
             {
                 frame = desktopDuplicator.GetLatestFrame();
             }
-            catch
+            catch(Exception ex)
             {
-                desktopDuplicator = new DesktopDuplicator(0);
+                Console.WriteLine("-------------->>>"+ex.Message);
             }
 
             return frame;

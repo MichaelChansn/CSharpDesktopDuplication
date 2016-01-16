@@ -28,7 +28,7 @@ namespace ControlServer1._0.BitmapComparer
         }
 
         /**根据开始点的坐标，扣取不同的图形块*/
-        public static Bitmap getBlocksIn1Bitmap(List<ShortPoint>difPoints,Bitmap fromBtmOrl,Size block)
+        public static Bitmap getBlocksIn1Bitmap(List<ShortRec>difPoints,Bitmap fromBtmOrl)
         {
             Bitmap fromBtm = (Bitmap)fromBtmOrl.Clone();//克隆一份，保证不冲突访问
             Bitmap ret = new Bitmap(fromBtmOrl.Width,fromBtmOrl.Height,PixelFormat.Format24bppRgb);
@@ -43,23 +43,23 @@ namespace ControlServer1._0.BitmapComparer
                 unsafe
                 {
 
-                    foreach (ShortPoint difPoint in difPoints)
+                    foreach (ShortRec difPoint in difPoints)
                     {
-                        int startX = difPoint.getXPoint();
-                        int startY = difPoint.getYPoint();
-                        int width = fromBtm.Width - startX > block.Width ? block.Width : fromBtm.Width - startX;
-                        int height = fromBtm.Height - startY > block.Height ? block.Height : fromBtm.Height - startY;
+                        int startX = difPoint.xPoint;
+                        int startY = difPoint.yPoint;
+                        int width = difPoint.width;
+                        int height = difPoint.height;
                         
                         byte* p1 = (byte*)bd1.Scan0 + startY * bd1.Stride;
                         byte* p2 = (byte*)bd2.Scan0 + startY * bd2.Stride;
 
                         //按块大小进行扫描不同数据
-                        for (int i = 0; i < block.Width; i += 1)
+                        for (int i = 0; i < width; i += 1)
                         {
                             int wi = startX + i;
                             if (wi >= bd1.Width || wi >= bd2.Width) break;
 
-                            for (int j = 0; j < block.Height; j += 1)
+                            for (int j = 0; j < height; j += 1)
                             {
                                 int hj = startY + j;
                                 if (hj >= bd1.Height || hj >= bd2.Height) break;
@@ -91,37 +91,31 @@ namespace ControlServer1._0.BitmapComparer
         }
 
         /**根据开始点的坐标，扣取不同的图形块*/
-        public static Bitmap getBlocksIn1BitmapClone(List<ShortPoint> difPoints, Bitmap fromBtmOrl, Size block)
+        public static Bitmap getBlocksIn1BitmapClone(List<ShortRec> difPoints, Bitmap fromBtmOrl, Size block)
         {
             Bitmap fromBtm = (Bitmap)fromBtmOrl.Clone();//克隆一份，保证不冲突访问
             Bitmap ret2 = new Bitmap(fromBtmOrl.Width, fromBtmOrl.Height, fromBtm.PixelFormat);
 
-
-
-
             Graphics g = Graphics.FromImage(ret2);
-            foreach (ShortPoint difPoint in difPoints)
+            foreach (ShortRec difPoint in difPoints)
             {
-                int startX = difPoint.getXPoint();
-                int startY = difPoint.getYPoint();
-                int width = fromBtm.Width - startX > block.Width ? block.Width : fromBtm.Width - startX;
-                int height = fromBtm.Height - startY > block.Height ? block.Height : fromBtm.Height - startY;
+                int startX = difPoint.xPoint;
+                int startY = difPoint.yPoint;
+                int width = difPoint.width;
+                int height = difPoint.height;
                 Bitmap temp=fromBtm.Clone(new Rectangle(startX, startY, width, height), fromBtm.PixelFormat);
                 g.DrawImage(temp, startX, startY);
                 temp.Dispose();
                 temp = null;
-
-
             }
             g.Dispose();
-
             return ret2;
 
 
         }
         /**根据开始点的坐标，扣取不同的图形块,异或处理*/
         private static byte BOTTOMLINE = 0;
-        public static Bitmap getBlocksIn1Bitmap(List<ShortPoint> difPoints, Bitmap fromBtmOrl, Bitmap globalBtmOrl, Size block)
+        public static Bitmap getBlocksIn1Bitmap(List<ShortRec> difPoints, Bitmap fromBtmOrl, Bitmap globalBtmOrl)
         {
             Bitmap fromBtm = (Bitmap)fromBtmOrl.Clone();//克隆一份，保证不冲突访问
             Bitmap globalBtm = (Bitmap)globalBtmOrl.Clone();
@@ -131,29 +125,29 @@ namespace ControlServer1._0.BitmapComparer
             BitmapData bd1 = fromBtm.LockBits(new Rectangle(0, 0, fromBtm.Width, fromBtm.Height), ImageLockMode.ReadOnly, pf);
             BitmapData bd2 = ret.LockBits(new Rectangle(0, 0, ret.Width, ret.Height), ImageLockMode.WriteOnly, pf);
 
-
             try
             {
                 unsafe
                 {
 
-                    foreach (ShortPoint difPoint in difPoints)
+                    foreach (ShortRec difPoint in difPoints)
                     {
-                        int startX = difPoint.getXPoint();
-                        int startY = difPoint.getYPoint();
-
+                        int startX = difPoint.xPoint;
+                        int startY = difPoint.yPoint;
+                        int width = difPoint.width;
+                        int height = difPoint.height;
 
                         byte* p0 = (byte*)bd0.Scan0 + startY * bd0.Stride;
                         byte* p1 = (byte*)bd1.Scan0 + startY * bd1.Stride;
                         byte* p2 = (byte*)bd2.Scan0 + startY * bd2.Stride;
 
                         //按块大小进行扫描不同数据
-                        for (int i = 0; i < block.Width; i += 1)
+                        for (int i = 0; i < width; i += 1)
                         {
                             int wi = startX + i;
                             if (wi >= bd1.Width || wi >= bd2.Width) break;
 
-                            for (int j = 0; j < block.Height; j += 1)
+                            for (int j = 0; j < height; j += 1)
                             {
                                 int hj = startY + j;
                                 if (hj >= bd1.Height || hj >= bd2.Height) break;

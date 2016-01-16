@@ -7,12 +7,22 @@ using System.Threading;
 
 namespace ControlServer1._0.StreamLine
 {
+    /**a blocking queue */
             class BlockingQueue<T>
             {
-                public readonly Queue<T> queue = null;
+                private readonly Queue<T> queue = null;
                 private readonly int maxSize=10;
                 public BlockingQueue(int maxSize) { this.maxSize = maxSize; queue = new Queue<T>(); }
-
+                public  int getQueueSize()
+                {
+                    return queue.Count;
+                }
+                public void clearQueue()
+                {
+                    lock(queue){
+                    queue.Clear();
+                    }
+                }
                 public void Enqueue(T item)
                 {
                     lock (queue)
@@ -23,10 +33,10 @@ namespace ControlServer1._0.StreamLine
                             {
                                 Monitor.Wait(queue);
                             }
-                            catch (ThreadInterruptedException ex)
+                            catch (Exception ex)
                             {
                                 ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message + ex.StackTrace);
-                                goto END;
+                                return;
                             }
                         }
                         queue.Enqueue(item);
@@ -36,8 +46,6 @@ namespace ControlServer1._0.StreamLine
                             Monitor.PulseAll(queue);
                         }
                     }
-                END:
-                    return;
                 }
                 public T Dequeue()
                 {
@@ -47,12 +55,13 @@ namespace ControlServer1._0.StreamLine
                         {
                             try
                             {
+                                /**wait for add*/
                                 Monitor.Wait(queue);
                             }
-                            catch(ThreadInterruptedException ex)
+                            catch (Exception ex)
                             {
                                 ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message + ex.StackTrace);
-                                goto END;
+                                return default(T);
                             }
                         }
                         T item = queue.Dequeue();
@@ -63,8 +72,6 @@ namespace ControlServer1._0.StreamLine
                         }
                         return item;
                     }
-                END:
-                    return default(T);
                 }
         }
 

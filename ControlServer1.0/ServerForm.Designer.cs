@@ -1,4 +1,7 @@
-﻿namespace ControlServer1._0
+﻿using System;
+using System.Drawing;
+using System.Windows.Forms;
+namespace ControlServer1._0
 {
     partial class ServerForm
     {
@@ -17,7 +20,11 @@
             {
                 components.Dispose();
             }
-            base.Dispose(disposing);
+            try
+            {
+                base.Dispose(disposing);
+            }
+            catch(Exception e){}
         }
 
         #region Windows 窗体设计器生成的代码
@@ -29,196 +36,388 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.pictureBoxSender = new System.Windows.Forms.PictureBox();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.textBoxSend = new System.Windows.Forms.TextBox();
-            this.textBoxDif = new System.Windows.Forms.TextBox();
-            this.textBoxCopy = new System.Windows.Forms.TextBox();
-            this.textBoxTimeShow = new System.Windows.Forms.TextBox();
-            this.buttonAverageTest = new System.Windows.Forms.Button();
-            this.buttonBitBltTest = new System.Windows.Forms.Button();
-            this.textBoxInfoShow = new System.Windows.Forms.TextBox();
-            this.buttonLocalTest = new System.Windows.Forms.Button();
-            this.buttonStartSendPic = new System.Windows.Forms.Button();
-            this.buttonStartSocket = new System.Windows.Forms.Button();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxSender)).BeginInit();
-            this.groupBox1.SuspendLayout();
-            this.groupBox2.SuspendLayout();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ServerForm));
+            this.buttonClose = new System.Windows.Forms.Button();
+            this.panelTop = new System.Windows.Forms.Panel();
+            this.labelTop = new System.Windows.Forms.Label();
+            this.buttonMin = new System.Windows.Forms.Button();
+            this.panelBackground = new System.Windows.Forms.Panel();
+            this.buttonServer = new System.Windows.Forms.Button();
+            this.panelLine = new System.Windows.Forms.Panel();
+            this.panelClient = new System.Windows.Forms.Panel();
+            this.labelAddr = new System.Windows.Forms.Label();
+            this.textBoxHost = new System.Windows.Forms.TextBox();
+            this.labelHost = new System.Windows.Forms.Label();
+            this.textBoxAddr = new System.Windows.Forms.TextBox();
+            this.labelClientInfo = new System.Windows.Forms.Label();
+            this.panelServer = new System.Windows.Forms.Panel();
+            this.labelSDQ = new System.Windows.Forms.Label();
+            this.labelFPS = new System.Windows.Forms.Label();
+            this.labelDBQ = new System.Windows.Forms.Label();
+            this.textBoxFPS = new System.Windows.Forms.TextBox();
+            this.labelCSQ = new System.Windows.Forms.Label();
+            this.textBoxDBQ = new System.Windows.Forms.TextBox();
+            this.textBoxCSQ = new System.Windows.Forms.TextBox();
+            this.textBoxSDQ = new System.Windows.Forms.TextBox();
+            this.timerGC = new System.Windows.Forms.Timer(this.components);
+            this.panelTop.SuspendLayout();
+            this.panelBackground.SuspendLayout();
+            this.panelClient.SuspendLayout();
+            this.panelServer.SuspendLayout();
             this.SuspendLayout();
             // 
-            // pictureBoxSender
+            // buttonClose
             // 
-            this.pictureBoxSender.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.pictureBoxSender.Location = new System.Drawing.Point(8, 29);
-            this.pictureBoxSender.Name = "pictureBoxSender";
-            this.pictureBoxSender.Size = new System.Drawing.Size(632, 362);
-            this.pictureBoxSender.TabIndex = 0;
-            this.pictureBoxSender.TabStop = false;
+            this.buttonClose.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(158)))), ((int)(((byte)(146)))));
+            this.buttonClose.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.buttonClose.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.buttonClose.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(158)))), ((int)(((byte)(146)))));
+            this.buttonClose.FlatAppearance.BorderSize = 0;
+            this.buttonClose.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Red;
+            this.buttonClose.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Red;
+            this.buttonClose.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonClose.Font = new System.Drawing.Font("仿宋", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Pixel, ((byte)(134)));
+            this.buttonClose.ForeColor = System.Drawing.Color.White;
+            this.buttonClose.Location = new System.Drawing.Point(296, 0);
+            this.buttonClose.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonClose.Name = "buttonClose";
+            this.buttonClose.Size = new System.Drawing.Size(26, 23);
+            this.buttonClose.TabIndex = 0;
+            this.buttonClose.Text = "×";
+            this.buttonClose.UseVisualStyleBackColor = false;
+            this.buttonClose.Click += new System.EventHandler(this.buttonClose_Click);
             // 
-            // groupBox1
+            // panelTop
             // 
-            this.groupBox1.Controls.Add(this.pictureBoxSender);
-            this.groupBox1.Location = new System.Drawing.Point(4, 6);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(649, 406);
-            this.groupBox1.TabIndex = 1;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "桌面图像";
+            this.panelTop.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
+            this.panelTop.Controls.Add(this.labelTop);
+            this.panelTop.Controls.Add(this.buttonMin);
+            this.panelTop.Location = new System.Drawing.Point(0, 0);
+            this.panelTop.Margin = new System.Windows.Forms.Padding(0);
+            this.panelTop.Name = "panelTop";
+            this.panelTop.Size = new System.Drawing.Size(322, 50);
+            this.panelTop.TabIndex = 1;
+            this.panelTop.MouseDown += new System.Windows.Forms.MouseEventHandler(this.top_MouseDown);
+            this.panelTop.MouseMove += new System.Windows.Forms.MouseEventHandler(this.top_MouseMove);
             // 
-            // groupBox2
+            // labelTop
             // 
-            this.groupBox2.Controls.Add(this.textBoxSend);
-            this.groupBox2.Controls.Add(this.textBoxDif);
-            this.groupBox2.Controls.Add(this.textBoxCopy);
-            this.groupBox2.Controls.Add(this.textBoxTimeShow);
-            this.groupBox2.Controls.Add(this.buttonAverageTest);
-            this.groupBox2.Controls.Add(this.buttonBitBltTest);
-            this.groupBox2.Controls.Add(this.textBoxInfoShow);
-            this.groupBox2.Controls.Add(this.buttonLocalTest);
-            this.groupBox2.Controls.Add(this.buttonStartSendPic);
-            this.groupBox2.Controls.Add(this.buttonStartSocket);
-            this.groupBox2.Location = new System.Drawing.Point(5, 418);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(648, 132);
-            this.groupBox2.TabIndex = 2;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "操作";
+            this.labelTop.AutoSize = true;
+            this.labelTop.CausesValidation = false;
+            this.labelTop.Font = new System.Drawing.Font("宋体", 20F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.labelTop.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(183)))), ((int)(((byte)(183)))), ((int)(((byte)(183)))));
+            this.labelTop.Location = new System.Drawing.Point(56, 9);
+            this.labelTop.Name = "labelTop";
+            this.labelTop.Size = new System.Drawing.Size(207, 27);
+            this.labelTop.TabIndex = 0;
+            this.labelTop.Text = "Remote Server";
+            this.labelTop.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.labelTop.MouseDown += new System.Windows.Forms.MouseEventHandler(this.top_MouseDown);
+            this.labelTop.MouseMove += new System.Windows.Forms.MouseEventHandler(this.top_MouseMove);
             // 
-            // textBoxSend
+            // buttonMin
             // 
-            this.textBoxSend.Location = new System.Drawing.Point(257, 98);
-            this.textBoxSend.Name = "textBoxSend";
-            this.textBoxSend.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxSend.Size = new System.Drawing.Size(100, 21);
-            this.textBoxSend.TabIndex = 5;
+            this.buttonMin.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(158)))), ((int)(((byte)(146)))));
+            this.buttonMin.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.buttonMin.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.buttonMin.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(158)))), ((int)(((byte)(146)))));
+            this.buttonMin.FlatAppearance.BorderSize = 0;
+            this.buttonMin.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Red;
+            this.buttonMin.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Red;
+            this.buttonMin.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonMin.Font = new System.Drawing.Font("仿宋", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Pixel, ((byte)(134)));
+            this.buttonMin.ForeColor = System.Drawing.Color.White;
+            this.buttonMin.Location = new System.Drawing.Point(269, 0);
+            this.buttonMin.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonMin.Name = "buttonMin";
+            this.buttonMin.Size = new System.Drawing.Size(26, 23);
+            this.buttonMin.TabIndex = 0;
+            this.buttonMin.Text = "﹣";
+            this.buttonMin.UseVisualStyleBackColor = false;
+            this.buttonMin.Click += new System.EventHandler(this.buttonMin_Click);
             // 
-            // textBoxDif
+            // panelBackground
             // 
-            this.textBoxDif.Location = new System.Drawing.Point(257, 70);
-            this.textBoxDif.Name = "textBoxDif";
-            this.textBoxDif.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxDif.Size = new System.Drawing.Size(100, 21);
-            this.textBoxDif.TabIndex = 5;
+            this.panelBackground.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(80)))), ((int)(((byte)(80)))), ((int)(((byte)(80)))));
+            this.panelBackground.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.panelBackground.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelBackground.Controls.Add(this.buttonServer);
+            this.panelBackground.Controls.Add(this.panelLine);
+            this.panelBackground.Controls.Add(this.panelClient);
+            this.panelBackground.Controls.Add(this.labelClientInfo);
+            this.panelBackground.Controls.Add(this.panelServer);
+            this.panelBackground.Location = new System.Drawing.Point(0, 50);
+            this.panelBackground.Margin = new System.Windows.Forms.Padding(0);
+            this.panelBackground.Name = "panelBackground";
+            this.panelBackground.Size = new System.Drawing.Size(322, 311);
+            this.panelBackground.TabIndex = 2;
             // 
-            // textBoxCopy
+            // buttonServer
             // 
-            this.textBoxCopy.Location = new System.Drawing.Point(257, 43);
-            this.textBoxCopy.Name = "textBoxCopy";
-            this.textBoxCopy.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxCopy.Size = new System.Drawing.Size(100, 21);
-            this.textBoxCopy.TabIndex = 5;
+            this.buttonServer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(158)))), ((int)(((byte)(146)))));
+            this.buttonServer.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.buttonServer.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.buttonServer.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(158)))), ((int)(((byte)(146)))));
+            this.buttonServer.FlatAppearance.BorderSize = 0;
+            this.buttonServer.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Red;
+            this.buttonServer.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Red;
+            this.buttonServer.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonServer.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.buttonServer.ForeColor = System.Drawing.Color.White;
+            this.buttonServer.Location = new System.Drawing.Point(35, 261);
+            this.buttonServer.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonServer.Name = "buttonServer";
+            this.buttonServer.Size = new System.Drawing.Size(250, 37);
+            this.buttonServer.TabIndex = 6;
+            this.buttonServer.Text = "START SERVER";
+            this.buttonServer.UseVisualStyleBackColor = false;
+            this.buttonServer.Click += new System.EventHandler(this.buttonServer_Click);
             // 
-            // textBoxTimeShow
+            // panelLine
             // 
-            this.textBoxTimeShow.Location = new System.Drawing.Point(257, 16);
-            this.textBoxTimeShow.Name = "textBoxTimeShow";
-            this.textBoxTimeShow.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxTimeShow.Size = new System.Drawing.Size(100, 21);
-            this.textBoxTimeShow.TabIndex = 5;
+            this.panelLine.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(123)))), ((int)(((byte)(123)))), ((int)(((byte)(123)))));
+            this.panelLine.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.panelLine.Location = new System.Drawing.Point(2, 153);
+            this.panelLine.Margin = new System.Windows.Forms.Padding(0);
+            this.panelLine.Name = "panelLine";
+            this.panelLine.Size = new System.Drawing.Size(316, 1);
+            this.panelLine.TabIndex = 4;
             // 
-            // buttonAverageTest
+            // panelClient
             // 
-            this.buttonAverageTest.Location = new System.Drawing.Point(506, 88);
-            this.buttonAverageTest.Name = "buttonAverageTest";
-            this.buttonAverageTest.Size = new System.Drawing.Size(105, 25);
-            this.buttonAverageTest.TabIndex = 4;
-            this.buttonAverageTest.Text = "压力测试";
-            this.buttonAverageTest.UseVisualStyleBackColor = true;
-            this.buttonAverageTest.Click += new System.EventHandler(this.buttonAverageTest_Click);
+            this.panelClient.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelClient.Controls.Add(this.labelAddr);
+            this.panelClient.Controls.Add(this.textBoxHost);
+            this.panelClient.Controls.Add(this.labelHost);
+            this.panelClient.Controls.Add(this.textBoxAddr);
+            this.panelClient.Location = new System.Drawing.Point(19, 37);
+            this.panelClient.Name = "panelClient";
+            this.panelClient.Size = new System.Drawing.Size(280, 100);
+            this.panelClient.TabIndex = 3;
             // 
-            // buttonBitBltTest
+            // labelAddr
             // 
-            this.buttonBitBltTest.Location = new System.Drawing.Point(506, 53);
-            this.buttonBitBltTest.Name = "buttonBitBltTest";
-            this.buttonBitBltTest.Size = new System.Drawing.Size(106, 25);
-            this.buttonBitBltTest.TabIndex = 3;
-            this.buttonBitBltTest.Text = "BitBlt测试";
-            this.buttonBitBltTest.UseVisualStyleBackColor = true;
-            this.buttonBitBltTest.Click += new System.EventHandler(this.buttonBitBltTest_Click);
+            this.labelAddr.AutoSize = true;
+            this.labelAddr.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Bold);
+            this.labelAddr.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(183)))), ((int)(((byte)(183)))), ((int)(((byte)(183)))));
+            this.labelAddr.Location = new System.Drawing.Point(7, 57);
+            this.labelAddr.Name = "labelAddr";
+            this.labelAddr.Size = new System.Drawing.Size(44, 16);
+            this.labelAddr.TabIndex = 1;
+            this.labelAddr.Text = "ADDR";
             // 
-            // textBoxInfoShow
+            // textBoxHost
             // 
-            this.textBoxInfoShow.Location = new System.Drawing.Point(10, 16);
-            this.textBoxInfoShow.Multiline = true;
-            this.textBoxInfoShow.Name = "textBoxInfoShow";
-            this.textBoxInfoShow.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxInfoShow.Size = new System.Drawing.Size(241, 108);
-            this.textBoxInfoShow.TabIndex = 2;
+            this.textBoxHost.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
+            this.textBoxHost.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.textBoxHost.Font = new System.Drawing.Font("宋体", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.textBoxHost.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(183)))), ((int)(((byte)(183)))), ((int)(((byte)(183)))));
+            this.textBoxHost.Location = new System.Drawing.Point(51, 17);
+            this.textBoxHost.Margin = new System.Windows.Forms.Padding(0);
+            this.textBoxHost.Name = "textBoxHost";
+            this.textBoxHost.Size = new System.Drawing.Size(216, 29);
+            this.textBoxHost.TabIndex = 0;
+            this.textBoxHost.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // buttonLocalTest
+            // labelHost
             // 
-            this.buttonLocalTest.Location = new System.Drawing.Point(506, 20);
-            this.buttonLocalTest.Name = "buttonLocalTest";
-            this.buttonLocalTest.Size = new System.Drawing.Size(106, 27);
-            this.buttonLocalTest.TabIndex = 1;
-            this.buttonLocalTest.Text = "CopyFrom测试";
-            this.buttonLocalTest.UseVisualStyleBackColor = true;
-            this.buttonLocalTest.Click += new System.EventHandler(this.buttonLocalTest_Click);
+            this.labelHost.AutoSize = true;
+            this.labelHost.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Bold);
+            this.labelHost.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(183)))), ((int)(((byte)(183)))), ((int)(((byte)(183)))));
+            this.labelHost.Location = new System.Drawing.Point(7, 23);
+            this.labelHost.Name = "labelHost";
+            this.labelHost.Size = new System.Drawing.Size(44, 16);
+            this.labelHost.TabIndex = 1;
+            this.labelHost.Text = "HOST";
             // 
-            // buttonStartSendPic
+            // textBoxAddr
             // 
-            this.buttonStartSendPic.Location = new System.Drawing.Point(382, 82);
-            this.buttonStartSendPic.Name = "buttonStartSendPic";
-            this.buttonStartSendPic.Size = new System.Drawing.Size(111, 37);
-            this.buttonStartSendPic.TabIndex = 1;
-            this.buttonStartSendPic.Text = "发送图像";
-            this.buttonStartSendPic.UseVisualStyleBackColor = true;
-            this.buttonStartSendPic.Click += new System.EventHandler(this.buttonStartSendPic_Click);
+            this.textBoxAddr.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
+            this.textBoxAddr.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.textBoxAddr.Font = new System.Drawing.Font("宋体", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.textBoxAddr.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(183)))), ((int)(((byte)(183)))), ((int)(((byte)(183)))));
+            this.textBoxAddr.Location = new System.Drawing.Point(51, 52);
+            this.textBoxAddr.Margin = new System.Windows.Forms.Padding(0);
+            this.textBoxAddr.Name = "textBoxAddr";
+            this.textBoxAddr.Size = new System.Drawing.Size(216, 29);
+            this.textBoxAddr.TabIndex = 0;
+            this.textBoxAddr.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // buttonStartSocket
+            // labelClientInfo
             // 
-            this.buttonStartSocket.Location = new System.Drawing.Point(382, 20);
-            this.buttonStartSocket.Name = "buttonStartSocket";
-            this.buttonStartSocket.Size = new System.Drawing.Size(111, 37);
-            this.buttonStartSocket.TabIndex = 0;
-            this.buttonStartSocket.Text = "启动Socket";
-            this.buttonStartSocket.UseVisualStyleBackColor = true;
-            this.buttonStartSocket.Click += new System.EventHandler(this.buttonStartSocket_Click);
+            this.labelClientInfo.AutoSize = true;
+            this.labelClientInfo.Font = new System.Drawing.Font("宋体", 13F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.labelClientInfo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(183)))), ((int)(((byte)(183)))), ((int)(((byte)(183)))));
+            this.labelClientInfo.Location = new System.Drawing.Point(99, 11);
+            this.labelClientInfo.Name = "labelClientInfo";
+            this.labelClientInfo.Size = new System.Drawing.Size(118, 18);
+            this.labelClientInfo.TabIndex = 2;
+            this.labelClientInfo.Text = "CLIENT INFO";
             // 
-            // timer1
+            // panelServer
             // 
-            this.timer1.Enabled = true;
-            this.timer1.Interval = 20;
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            this.panelServer.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelServer.Controls.Add(this.labelSDQ);
+            this.panelServer.Controls.Add(this.labelFPS);
+            this.panelServer.Controls.Add(this.labelDBQ);
+            this.panelServer.Controls.Add(this.textBoxFPS);
+            this.panelServer.Controls.Add(this.labelCSQ);
+            this.panelServer.Controls.Add(this.textBoxDBQ);
+            this.panelServer.Controls.Add(this.textBoxCSQ);
+            this.panelServer.Controls.Add(this.textBoxSDQ);
+            this.panelServer.Location = new System.Drawing.Point(19, 166);
+            this.panelServer.Name = "panelServer";
+            this.panelServer.Size = new System.Drawing.Size(280, 86);
+            this.panelServer.TabIndex = 8;
+            // 
+            // labelSDQ
+            // 
+            this.labelSDQ.AutoSize = true;
+            this.labelSDQ.Font = new System.Drawing.Font("宋体", 10F, System.Drawing.FontStyle.Bold);
+            this.labelSDQ.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(183)))), ((int)(((byte)(183)))), ((int)(((byte)(183)))));
+            this.labelSDQ.Location = new System.Drawing.Point(149, 56);
+            this.labelSDQ.Name = "labelSDQ";
+            this.labelSDQ.Size = new System.Drawing.Size(31, 14);
+            this.labelSDQ.TabIndex = 7;
+            this.labelSDQ.Text = "SDQ";
+            // 
+            // labelFPS
+            // 
+            this.labelFPS.AutoSize = true;
+            this.labelFPS.Font = new System.Drawing.Font("宋体", 10F, System.Drawing.FontStyle.Bold);
+            this.labelFPS.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(183)))), ((int)(((byte)(183)))), ((int)(((byte)(183)))));
+            this.labelFPS.Location = new System.Drawing.Point(33, 13);
+            this.labelFPS.Name = "labelFPS";
+            this.labelFPS.Size = new System.Drawing.Size(31, 14);
+            this.labelFPS.TabIndex = 7;
+            this.labelFPS.Text = "FPS";
+            // 
+            // labelDBQ
+            // 
+            this.labelDBQ.AutoSize = true;
+            this.labelDBQ.Font = new System.Drawing.Font("宋体", 10F, System.Drawing.FontStyle.Bold);
+            this.labelDBQ.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(183)))), ((int)(((byte)(183)))), ((int)(((byte)(183)))));
+            this.labelDBQ.Location = new System.Drawing.Point(149, 13);
+            this.labelDBQ.Name = "labelDBQ";
+            this.labelDBQ.Size = new System.Drawing.Size(31, 14);
+            this.labelDBQ.TabIndex = 7;
+            this.labelDBQ.Text = "DBQ";
+            // 
+            // textBoxFPS
+            // 
+            this.textBoxFPS.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
+            this.textBoxFPS.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.textBoxFPS.Font = new System.Drawing.Font("宋体", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.textBoxFPS.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(183)))), ((int)(((byte)(183)))), ((int)(((byte)(183)))));
+            this.textBoxFPS.Location = new System.Drawing.Point(69, 10);
+            this.textBoxFPS.Name = "textBoxFPS";
+            this.textBoxFPS.Size = new System.Drawing.Size(49, 23);
+            this.textBoxFPS.TabIndex = 5;
+            this.textBoxFPS.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // labelCSQ
+            // 
+            this.labelCSQ.AutoSize = true;
+            this.labelCSQ.Font = new System.Drawing.Font("宋体", 10F, System.Drawing.FontStyle.Bold);
+            this.labelCSQ.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(183)))), ((int)(((byte)(183)))), ((int)(((byte)(183)))));
+            this.labelCSQ.Location = new System.Drawing.Point(33, 56);
+            this.labelCSQ.Name = "labelCSQ";
+            this.labelCSQ.Size = new System.Drawing.Size(31, 14);
+            this.labelCSQ.TabIndex = 7;
+            this.labelCSQ.Text = "CSQ";
+            // 
+            // textBoxDBQ
+            // 
+            this.textBoxDBQ.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
+            this.textBoxDBQ.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.textBoxDBQ.Font = new System.Drawing.Font("宋体", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.textBoxDBQ.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(183)))), ((int)(((byte)(183)))), ((int)(((byte)(183)))));
+            this.textBoxDBQ.Location = new System.Drawing.Point(186, 9);
+            this.textBoxDBQ.Name = "textBoxDBQ";
+            this.textBoxDBQ.Size = new System.Drawing.Size(49, 23);
+            this.textBoxDBQ.TabIndex = 5;
+            this.textBoxDBQ.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // textBoxCSQ
+            // 
+            this.textBoxCSQ.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
+            this.textBoxCSQ.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.textBoxCSQ.Font = new System.Drawing.Font("宋体", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.textBoxCSQ.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(183)))), ((int)(((byte)(183)))), ((int)(((byte)(183)))));
+            this.textBoxCSQ.Location = new System.Drawing.Point(69, 52);
+            this.textBoxCSQ.Name = "textBoxCSQ";
+            this.textBoxCSQ.Size = new System.Drawing.Size(49, 23);
+            this.textBoxCSQ.TabIndex = 5;
+            this.textBoxCSQ.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // textBoxSDQ
+            // 
+            this.textBoxSDQ.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
+            this.textBoxSDQ.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.textBoxSDQ.Font = new System.Drawing.Font("宋体", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.textBoxSDQ.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(183)))), ((int)(((byte)(183)))), ((int)(((byte)(183)))));
+            this.textBoxSDQ.Location = new System.Drawing.Point(186, 52);
+            this.textBoxSDQ.Name = "textBoxSDQ";
+            this.textBoxSDQ.Size = new System.Drawing.Size(49, 23);
+            this.textBoxSDQ.TabIndex = 5;
+            this.textBoxSDQ.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // timerGC
+            // 
+            this.timerGC.Enabled = true;
+            this.timerGC.Interval = 50;
+            this.timerGC.Tick += new System.EventHandler(this.timerGC_Tick);
             // 
             // ServerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(656, 563);
-            this.Controls.Add(this.groupBox2);
-            this.Controls.Add(this.groupBox1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
+            this.ClientSize = new System.Drawing.Size(322, 360);
+            this.Controls.Add(this.panelBackground);
+            this.Controls.Add(this.buttonClose);
+            this.Controls.Add(this.panelTop);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "ServerForm";
-            this.Text = "图像差异传输测试服务端";
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxSender)).EndInit();
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
+            this.Text = "Form1";
+            this.panelTop.ResumeLayout(false);
+            this.panelTop.PerformLayout();
+            this.panelBackground.ResumeLayout(false);
+            this.panelBackground.PerformLayout();
+            this.panelClient.ResumeLayout(false);
+            this.panelClient.PerformLayout();
+            this.panelServer.ResumeLayout(false);
+            this.panelServer.PerformLayout();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.PictureBox pictureBoxSender;
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.TextBox textBoxInfoShow;
-        private System.Windows.Forms.Button buttonStartSendPic;
-        private System.Windows.Forms.Button buttonStartSocket;
-        private System.Windows.Forms.Button buttonLocalTest;
-        private System.Windows.Forms.Button buttonBitBltTest;
-        private System.Windows.Forms.Button buttonAverageTest;
-        private System.Windows.Forms.Timer timer1;
-        private System.Windows.Forms.TextBox textBoxTimeShow;
-        private System.Windows.Forms.TextBox textBoxCopy;
-        private System.Windows.Forms.TextBox textBoxSend;
-        private System.Windows.Forms.TextBox textBoxDif;
+        private System.Windows.Forms.Button buttonClose;
+        private System.Windows.Forms.Panel panelTop;
+        private System.Windows.Forms.Panel panelBackground;
+        private System.Windows.Forms.Label labelTop;
+        private System.Windows.Forms.TextBox textBoxHost;
+        private System.Windows.Forms.TextBox textBoxAddr;
+        private System.Windows.Forms.Label labelAddr;
+        private System.Windows.Forms.Label labelHost;
+        private Label labelClientInfo;
+        private Panel panelClient;
+        private Panel panelLine;
+        private Button buttonServer;
+        private TextBox textBoxSDQ;
+        private TextBox textBoxCSQ;
+        private TextBox textBoxDBQ;
+        private TextBox textBoxFPS;
+        private Label labelCSQ;
+        private Label labelFPS;
+        private Label labelSDQ;
+        private Label labelDBQ;
+        private Panel panelServer;
+        private Button buttonMin;
+        private Timer timerGC;    
+    
     }
 }
 

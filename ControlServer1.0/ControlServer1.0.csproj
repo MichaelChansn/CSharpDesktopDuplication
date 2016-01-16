@@ -8,10 +8,12 @@
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ControlServer1._0</RootNamespace>
-    <AssemblyName>ControlServer1.0</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <AssemblyName>Remote Server</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
     <PublishUrl>发布\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -26,8 +28,6 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -54,6 +54,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>App.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="SharpDX, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -69,7 +72,7 @@
     </Reference>
     <Reference Include="Simplicit.Net.Lzo, Version=1.0.0.0, Culture=neutral">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\Simplicit.Net.Lzo.dll</HintPath>
+      <HintPath>libs\Simplicit.Net.Lzo.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -82,13 +85,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AbandonFuns\BitmapAndTimes.cs" />
     <Compile Include="BitmapTools\BitmapCmp24Bit.cs" />
     <Compile Include="BitmapTools\BitmapCmp32Bit.cs" />
     <Compile Include="BitmapTools\GetDifBlocks.cs" />
     <Compile Include="BitmapTools\JpegZip.cs" />
-    <Compile Include="CopyScreenAndBitmapTools\BitmapTool.cs" />
+    <Compile Include="CommandProcess\CmdProcess.cs" />
+    <Compile Include="CopyScreenAndBitmapTools\Compress2JepgWithQty.cs" />
     <Compile Include="CopyScreenAndBitmapTools\CopyScreen.cs" />
+    <Compile Include="DataPacket\ENUMS.cs" />
     <Compile Include="DataPacket\RecPacket.cs" />
     <Compile Include="DesktopDuplication\DesktopDuplicationException.cs" />
     <Compile Include="DesktopDuplication\DesktopDuplicator.cs" />
@@ -96,7 +100,6 @@
     <Compile Include="DesktopDuplication\MovedRegion.cs" />
     <Compile Include="DesktopDuplication\PointerInfo.cs" />
     <Compile Include="ErrorMessage\ErrorInfo.cs" />
-    <Compile Include="AbandonFuns\GDIGrabScreen.cs" />
     <Compile Include="ICSharpCode.SharpZLib\BZip2\BZip2.cs" />
     <Compile Include="ICSharpCode.SharpZLib\BZip2\BZip2Constants.cs" />
     <Compile Include="ICSharpCode.SharpZLib\BZip2\BZip2Exception.cs" />
@@ -159,10 +162,12 @@
     <Compile Include="ICSharpCode.SharpZLib\Zip\ZipInputStream.cs" />
     <Compile Include="ICSharpCode.SharpZLib\Zip\ZipNameTransform.cs" />
     <Compile Include="ICSharpCode.SharpZLib\Zip\ZipOutputStream.cs" />
+    <Compile Include="OSInfos\OperatingSystemInfos.cs" />
     <Compile Include="ScreenBitmap\BitmapWithCursor.cs" />
     <Compile Include="ScreenBitmap\DifferentBitmapWithCursor.cs" />
     <Compile Include="ScreenBitmap\ShortPoint.cs" />
     <Compile Include="DataPacket\SendPacket.cs" />
+    <Compile Include="ScreenBitmap\ShortRec.cs" />
     <Compile Include="ServerForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -172,7 +177,6 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StreamLine\BlockingQueue.cs" />
-    <Compile Include="Test\Tests.cs" />
     <EmbeddedResource Include="ServerForm.resx">
       <DependentUpon>ServerForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -211,12 +215,12 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <WCFMetadata Include="Service References\" />
-  </ItemGroup>
-  <ItemGroup>
+    <Content Include="App.ico" />
     <Content Include="ICSharpCode.SharpZLib\ICSharpCode.SharpZLib.csproj" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Resources\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

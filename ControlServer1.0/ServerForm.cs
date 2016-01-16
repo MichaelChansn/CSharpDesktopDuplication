@@ -22,107 +22,39 @@ using ControlServer1._0.BitmapComparer;
 using ControlServer1._0.BitmapTools;
 using ICSharpCode.SharpZipLib.Zip;
 using DesktopDuplication;
+using ControlServer1._0.OSInfos;
+using ControlServer1._0.CommandProcess;
 
 namespace ControlServer1._0
 {
     public partial class ServerForm : Form
     {
-        private static int PORT = 8888;
-        private static StringBuilder strInfo=new StringBuilder();
+        private static int TCP_PORT = 8888;
         private static Socket serverSocket = null;
+        private static Socket clientSocket = null;
         private static Thread serverSocketThread = null;//服务器等待连接线程
         private static Thread clientSocketHandlerThread = null;//客户端连接处理线程
 
-       
+
         private static Thread copyScreenThread = null;//截屏线程
         private static Thread compressThread = null;//jpeg和Zip压缩线程
         private static Thread bitmapCmpThread = null;//图形差异比较线程
         private static Thread sendPacketThread = null;//数据发送线程
         private static Thread recPacketThread = null;//数据接收线程
 
+        private static int UDP_PORT = 9999;
+        private static Thread DUPScanThread = null;
+        private static UdpClient udpClient=null;
+
         private static bool isServerRun = false;
-        private static bool isClentRun = false;
+        private static bool isClientRun = false;
         private static bool isSendPic = false;
-        public ServerForm()
-        {
-            InitializeComponent();
-            System.Windows.Forms.Control.CheckForIllegalCrossThreadCalls = false;
-        }
+        private static bool isWin8Above = false;
+        private ManualResetEvent manulResetEvent = new ManualResetEvent(false);
 
-        private void buttonStartSocket_Click(object sender, EventArgs e)
-        {
-            if (!isServerRun)
-            {
-                isServerRun = true;
-                serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                serverSocket.Bind(new IPEndPoint(IPAddress.Any, PORT));
-                serverSocket.Blocking = true;
-                serverSocket.Listen(5);
-
-
-                serverSocketThread = new Thread(new ParameterizedThreadStart(serverSocketFun));
-                serverSocketThread.Priority = ThreadPriority.Lowest;
-                serverSocketThread.IsBackground = true;
-                serverSocketThread.Start(serverSocket);
-
-                strInfo.Append("TCP服务端已经开启，端口号：8888\n");
-                textBoxInfoShow.Text = strInfo.ToString();
-                buttonStartSocket.Text="停止socket";
-            }
-            else
-            {
-                isServerRun = false;
-                buttonStartSocket.Text = "启动socket";
-                try
-                {
-                    serverSocketThread.Interrupt();
-                    serverSocket.Shutdown(SocketShutdown.Both);
-                    serverSocket.Close();
-                }
-                catch (SocketException)
-                { 
-                }
-
-            }
-
-
-           
-
-            
-            
-          
-
-        }
-
-        /**
-         * 服务线程，用来接收链接
-         */
-        private void serverSocketFun(object serverSocket)
-        {
-            while (isServerRun)
-            {
-                try
-                {
-                    Socket clientSocket = ((Socket)serverSocket).Accept();
-                    clientSocketHandlerThread = new Thread(new ParameterizedThreadStart(clientSocketHandlerFun));
-                    clientSocketHandlerThread.Priority = ThreadPriority.Highest;
-                    clientSocketHandlerThread.IsBackground = true;
-                    clientSocketHandlerThread.Start(clientSocket);
-                }
-                catch (Exception ex)
-                {
-                    ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message + "\r\n" + ex.StackTrace);
-                    
-                }
-            }
-        }
-
-
-
-        
         /**创建一个10帧大小的屏幕截图队列*/
         private BlockingQueue<BitmapWithCursor> screenCopyQueue = new BlockingQueue<BitmapWithCursor>(10);
-        
+
         /**创建一个5帧大小的jpeg屏幕差异队列*/
         private BlockingQueue<DifferentBitmapWithCursor> screenCopyDifQueue = new BlockingQueue<DifferentBitmapWithCursor>(10);
 
@@ -135,16 +67,173 @@ namespace ControlServer1._0
 
         /**全局比较图形*/
         private static Bitmap globalComparerBitmap = null;
-        
-       
+        public ServerForm()
+        {
+            InitializeComponent();
+            System.Windows.Forms.Control.CheckForIllegalCrossThreadCalls = false;
+            isWin8Above = OperatingSystemInfos.isWin8Above();
+            Console.WriteLine("system is win8 above:" + isWin8Above);
+        }
+
+        private void stopUDP()
+        {
+            if (udpClient != null)
+            {
+                udpClient.Close();
+                udpClient = null;
+            }
+            if (DUPScanThread != null)
+            {
+                DUPScanThread.Interrupt();
+                DUPScanThread.Abort();
+                DUPScanThread.Join();
+            }
+           
+        }
+        private void startUDPReceiverThread()
+        {
+            DUPScanThread = new Thread(udpReceive);
+            DUPScanThread.IsBackground = true;
+            DUPScanThread.Priority = ThreadPriority.Lowest;
+            DUPScanThread.Start();
+        }
+        void udpReceive()
+        {
+            udpClient = new UdpClient(UDP_PORT);
+            IPEndPoint RemoteIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
+            while (isServerRun)
+            {
+                try
+                {
+                    Byte[] receiveBytes = udpClient.Receive(ref RemoteIpEndPoint);//这个方法是阻塞的
+                    string returnData = Encoding.UTF8.GetString(receiveBytes);
+                    Console.WriteLine(returnData);
+                    string[] rec = returnData.Split(ENUMS.NETSEPARATOR.ToCharArray(),StringSplitOptions.RemoveEmptyEntries);
+                    if (rec[0] == ENUMS.UDPSCANMESSAGE && rec.Length==2)
+                    {
+                        this.setMessageHost(rec[1]+" Scanning...");
+                        Console.WriteLine(rec[1] + ":" + RemoteIpEndPoint.ToString());
+                        byte[] buf = Encoding.UTF8.GetBytes(ENUMS.UDPSCANRETURN+ENUMS.NETSEPARATOR+System.Environment.UserName + ENUMS.NETSEPARATOR + TCP_PORT);
+                        udpClient.Send(buf, buf.Length, RemoteIpEndPoint);
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    if (udpClient != null)
+                    {
+                        udpClient.Close();
+                        udpClient = null;
+                    }
+                    return;
+                }
+
+
+            }
+            if (udpClient != null)
+            {
+                udpClient.Close();
+                udpClient = null;
+            }
+        }
+        private void buttonServer_Click(object sender, EventArgs e)
+        {
+            if (!isServerRun)
+            {
+                isServerRun = true;
+                startUDPReceiverThread();
+                serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                serverSocket.Bind(new IPEndPoint(IPAddress.Any, TCP_PORT));
+                serverSocket.Blocking = true;
+                serverSocket.Listen(5);
+
+                serverSocketThread = new Thread(new ParameterizedThreadStart(serverSocketFun));
+                serverSocketThread.Priority = ThreadPriority.Lowest;
+                serverSocketThread.IsBackground = true;
+                serverSocketThread.Start(serverSocket);
+
+                textBoxHost.Text = "SERVER IS RUNNING...";
+                textBoxAddr.Text = "WAIT FOR CLIENT...";
+                buttonServer.Text = "STOP SERVER";
+                this.buttonServer.BackColor = System.Drawing.Color.Red;
+                this.buttonServer.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(158)))), ((int)(((byte)(146)))));
+                this.buttonServer.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(158)))), ((int)(((byte)(146)))));
+            }
+            else
+            {
+                isServerRun = false;
+                stopUDP();
+                buttonServer.Text = "START SERVER";
+                textBoxHost.Text = "SERVER IS CLOSE...";
+                textBoxAddr.Text = "";
+                this.buttonServer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(158)))), ((int)(((byte)(146)))));
+                this.buttonServer.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Red;
+                this.buttonServer.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Red;
+                try
+                {
+                    stopAllThreads();
+
+                }
+                catch (SocketException se)
+                {
+                    Console.WriteLine(se.Message);
+                    ErrorInfo.getErrorWriter().writeErrorMassageToFile(se.Message);
+                }
+
+            }
+
+        }
+
+        public void setMessageHost(String message)
+        {
+            textBoxHost.Text = message;
+        }
+        public void setClientCloseMessage()
+        {
+            textBoxHost.Text = "Client Off Line";
+            textBoxAddr.Text = "No Client On Line";
+        }
+        /**
+         * 服务线程，用来接收链接
+         */
+        private void serverSocketFun(object serverSocket)
+        {
+            while (isServerRun)
+            {
+                try
+                {
+                    Socket client = ((Socket)serverSocket).Accept();
+                    if (clientSocket != null)
+                    {
+                        stopClient();
+
+                    }
+                    clientSocket = client;
+                    textBoxHost.Text = "CLIENT IS CONNECTED!";
+                    textBoxAddr.Text = clientSocket.RemoteEndPoint.ToString();
+                    clientSocketHandlerThread = new Thread(new ParameterizedThreadStart(clientSocketHandlerFun));
+                    clientSocketHandlerThread.Priority = ThreadPriority.Normal;
+                    clientSocketHandlerThread.IsBackground = true;
+                    clientSocketHandlerThread.Start(clientSocket);
+                }
+                catch (Exception ex)
+                {
+
+                    Console.WriteLine(ex.Message);
+                    ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message + "\r\n" + ex.StackTrace);
+
+                }
+            }
+        }
+
+
+
         private void clientSocketHandlerFun(object clientSocket)
         {
 
+            isClientRun = true;
 
-            isClentRun = true;
-
-          
-            
             /**开启各种工作线程*/
 
             /*1*数据接收线程*/
@@ -159,13 +248,143 @@ namespace ControlServer1._0
             sendPacketThread.IsBackground = true;
             sendPacketThread.Start(clientSocket);
 
+            startSendPicThreads();
 
+        }
+
+
+        /**线程接收函数*/
+        private void recPacketFun(object clientSocket)
+        {
+            if (clientSocket == null) return;
+            Socket client = (Socket)clientSocket;
+            if (!client.Connected) return;
+            NetworkStream stream = new NetworkStream(client);
+            BinaryReader reader = new BinaryReader(stream);
+            while (isClientRun)
+            {
+                //Console.WriteLine("recPacketThread***********");
+                try
+                {
+                    ENUMS.MESSAGETYPE messageType = (ENUMS.MESSAGETYPE)reader.ReadByte();
+                    CmdProcess.processCmd(this,reader, messageType);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("readThread:client is off line");
+                    stopClient();/**clean socket*/
+                    Console.WriteLine(ex.Message);
+                    ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message + "\r\n" + ex.StackTrace + "\r\n");
+                }
+                
+            }
+
+        }
+        /**数据发送函数*/
+        private void sendPacketFun(object clientSocket)
+        {
+            if (clientSocket == null) return;
+            Socket client = (Socket)clientSocket;
+            if (!client.Connected) return;
+            NetworkStream stream = new NetworkStream(client);
+            BinaryWriter writer = new BinaryWriter(stream);
+            sendMessage2Client("hello,this is a test");
+            while (isClientRun)
+            {
+                //TODO
+                SendPacket sendpacket = sendPacketQueue.Dequeue();
+                if (sendpacket != null)
+                {
+                   // Console.WriteLine("sendPacketThread***********");
+                    try
+                    {
+                        SendPacket.PacketType packetType = sendpacket.getPacketType();
+                        switch (packetType)
+                        {
+                            case SendPacket.PacketType.BITMAP:
+                                    writer.Write((byte)packetType);
+                                    writer.Write((Int32)sendpacket.getbitmapBytesLength());
+                                    writer.Write((byte)sendpacket.getBitmapType());
+                                    writer.Write((Int16)sendpacket.getCursorPoint().getXPoint());
+                                    writer.Write((Int16)sendpacket.getCursorPoint().getYPoint());
+                                    List<ShortRec> difPointsList = sendpacket.getDifPointsList();
+                                    Int16 difNum = 0;
+                                    if (difPointsList != null)
+                                    {
+                                        difNum = (Int16)difPointsList.Count;
+                                    }
+                                    writer.Write((Int16)difNum);
+
+                                    if (difNum > 0)
+                                    {
+                                        List<ShortRec> difPoints = sendpacket.getDifPointsList();
+                                        foreach (ShortRec dif in difPoints)
+                                        {
+                                            writer.Write(dif.xPoint);
+                                            writer.Write(dif.yPoint);
+                                            writer.Write(dif.width);
+                                            writer.Write(dif.height);
+                                        }
+                                    }
+                                    writer.Write(sendpacket.getBitByts(), 0, sendpacket.getbitmapBytesLength());
+                                    writer.Flush();
+                                break;
+                            case SendPacket.PacketType.TEXT:
+                                    writer.Write((byte)packetType);
+                                    byte[] sendBytes=Encoding.UTF8.GetBytes(sendpacket.getStringValue());
+                                    writer.Write(sendBytes.Length);
+                                    writer.Write(sendBytes);
+                                    writer.Flush();
+                                break;
+                            default:
+                                break;
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("sendThread:client is off line");
+                        stopClient();/**clean socket*/
+                        Console.WriteLine(ex.Message);
+                        ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message + "\r\n" + ex.StackTrace + "\r\n");
+                    }
+                }
+            }
+
+
+        }
+
+
+
+        private bool picFlag = false;
+        public  void startSendPicFlags()
+        {
+            picFlag = true;
+            manulResetEvent.Set();
+        }
+        public  void stopSendPicFlags()
+        {
+            picFlag = false;
+            manulResetEvent.Reset();
+        }
+        private void sendMessage2Client(String message)
+        {
+            SendPacket sendpacket = new SendPacket();
+            sendpacket.setPacketType(SendPacket.PacketType.TEXT);
+            sendpacket.setStringValue(message);
+            sendPacketQueue.Enqueue(sendpacket);
+            textBoxSDQ.Text = sendPacketQueue.getQueueSize() + "";
+
+        }
+        /**开始发送截图，流水线开始工作*/
+        public  void startSendPicThreads()
+        {
+            isSendPic = true;
             /*3*截屏线程*/
             copyScreenThread = new Thread(new ThreadStart(copyScreenToBlockingQueue));
             copyScreenThread.Priority = ThreadPriority.AboveNormal;
             copyScreenThread.IsBackground = true;
             copyScreenThread.Start();
-            
 
             /*4*图像差异比较线程*/
             bitmapCmpThread = new Thread(new ThreadStart(bitmapCmpToBlockingQueue));
@@ -178,168 +397,132 @@ namespace ControlServer1._0
             compressThread.Priority = ThreadPriority.AboveNormal;
             compressThread.IsBackground = true;
             compressThread.Start();
-               
-            
 
         }
-
-
-        /**线程接收函数*/
-        private void recPacketFun(object clientSocket)
+        /**停止发送截图，流水线停止工作*/
+        public void stopSendPicThreads()
         {
-            NetworkStream stream = new NetworkStream((Socket)clientSocket);
-            BinaryReader reader = new BinaryReader(stream);
-            while (isClentRun)
+
+            isSendPic = false;
+            isFirstFrame = true;
+            /* manualEvent.Reset();*/
+            if (copyScreenThread != null)
             {
-                //TODO
-                Thread.Sleep(5000);
+                copyScreenThread.Interrupt();
+                copyScreenThread.Abort();
+                if (copyScreenThread != null)
+                copyScreenThread.Join();
+                copyScreenThread = null;
             }
- 
-        }
-        /**数据发送函数*/
-        private void sendPacketFun(object clientSocket)
-        {
-            Socket client = (Socket)clientSocket;
-            NetworkStream stream = new NetworkStream(client);
-            BinaryWriter writer = new BinaryWriter(stream);
-            //使用while，防止线程的伪唤醒
-            while (!isSendPic)
-            {   //客户端未请求图形时，阻塞，类似java中的object.wait()
-                manualEvent.WaitOne();
-            }
-            
-
-
-            while (isSendPic)
+            if (bitmapCmpThread != null)
             {
-                //TODO
-               SendPacket sendpacket = sendPacketQueue.Dequeue();
-               if (sendpacket != null)
-               {
-                   textBoxSend.Text = "send队列：" + sendPacketQueue.queue.Count;
-                   try
-                   {
-                       writer.Write((Int32)sendpacket.getbitmapBytesLength());
-                       writer.Write((byte)sendpacket.getBitmapType());
-                       writer.Write((Int16)sendpacket.getCursorPoint().getXPoint());
-                       writer.Write((Int16)sendpacket.getCursorPoint().getYPoint());
-                       List<ShortPoint> difPointsList = sendpacket.getDifPointsList();
-                       Int16 difNum = 0;
-                       if (difPointsList != null)
-                       {
-                           difNum = (Int16)difPointsList.Count;
-                       }
-                       writer.Write((Int16)difNum);
-                       
-                       if (difNum > 0)
-                       {
-                           List<ShortPoint> difPoints = sendpacket.getDifPointsList();
-                           foreach (ShortPoint dif in difPoints)
-                           {
-                               writer.Write(dif.getXPoint());
-                               writer.Write(dif.getYPoint());
-                           }
-                       }
-                       writer.Write(sendpacket.getBitByts(), 0, sendpacket.getbitmapBytesLength());
-                       writer.Flush();
-                       /*
-                       FileStream fs = File.OpenWrite("D:\\serverZip.zip");
-                       fs.Write(sendpacket.getBitByts(), 0, sendpacket.getbitmapBytesLength());
-                       fs.Close();
-                       */
-
-
-                      // MessageBox.Show(sendpacket.getbitmapBytesLength() + "");
-
-                   }
-                   catch (Exception ex)
-                   {
-                       ErrorInfo.getErrorWriter().writeErrorMassageToFile(DateTime.Now.ToString()+ex.Message+"\r\n"+ex.StackTrace+"\r\n");
-                   }
-               }
+                bitmapCmpThread.Interrupt();
+                bitmapCmpThread.Abort();
+                if(bitmapCmpThread!=null)
+                bitmapCmpThread.Join();
+                bitmapCmpThread = null;
             }
-            
- 
+            if (compressThread != null)
+            {
+                compressThread.Interrupt();
+                compressThread.Abort();
+                if(compressThread!=null)
+                compressThread.Join();
+                compressThread = null;
+            }
+
+
         }
 
-        /**截图函数*/
-        private object openSendPic = new object();
-        ManualResetEvent manualEvent = new ManualResetEvent(false);
-       
-        /**根据屏幕变化的率的大小，动态的调整截屏间隔，优化流量和流畅度。
-         * 最小100，最大950;
+        /*
+         * 根据屏幕变化的率的大小，动态的调整截屏间隔，优化流量和流畅度。
+         * 最小50，最大950;
          */
-        private static int dynamicTime = 80;
+        private static int dynamicTime = 90;
         private void copyScreenToBlockingQueue()
         {
-            //使用while，防止线程的伪唤醒
-            while (!isSendPic)
-            {   //客户端未请求图形时，阻塞，类似java中的object.wait()
-                manualEvent.WaitOne();
-            }
-            
-            
-            /* 采用的GDI形式获取桌面图形，效率比较低
-            while (isSendPic)
-            {
-                Thread.Sleep(dynamicTime);
-                int cursorX, cursorY;
-                Bitmap btm = CopyScreen.getScreenPic(out cursorX, out cursorY);
-                if (btm != null)
-                {
-                    BitmapWithCursor bitmapWithCursor = new BitmapWithCursor();
-                    bitmapWithCursor.setCursorPoint(new ShortPoint(cursorX, cursorY));
-                    bitmapWithCursor.setScreenBitmap(btm);
-                    screenCopyQueue.Enqueue(bitmapWithCursor);
-                    textBoxCopy.Text = "copy队列：" + screenCopyQueue.queue.Count;
-                }
-            }*/
-            /**采用DXGI形式获取桌面，只能使用在win8以上系统，效率比较高，用来代替Mirror Driver*/
             Stopwatch sw = new Stopwatch();
             sw.Start();
             int fps = 0;//统计FPS
+            bool nullFrame = true;
+
             while (isSendPic)
             {
-                
-                Thread.Sleep(dynamicTime);
-                DesktopFrame frame = CopyScreen.getScreenPicDXGI();
-                if (frame != null)
+                while (!picFlag)
                 {
-                    fps++;
-                    BitmapWithCursor bitmapWithCursor = new BitmapWithCursor();
-                    bitmapWithCursor.setCursorPoint(new ShortPoint(System.Windows.Forms.Cursor.Position.X,System.Windows.Forms.Cursor.Position.Y));
-                    bitmapWithCursor.setScreenBitmap(frame.DesktopImage);
-                    bitmapWithCursor.dirtyRecs = frame.UpdatedRegions;
-                    screenCopyQueue.Enqueue(bitmapWithCursor);
-                    textBoxCopy.Text = "copy队列：" + screenCopyQueue.queue.Count;
+                    try
+                    {
+                        manulResetEvent.WaitOne();
+                    }
+                    catch (ThreadInterruptedException ex)
+                    {
+                        manulResetEvent.Reset();
+                        Console.WriteLine(ex.Message);
+                        ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message);
+                        return;
+                    }
                 }
-                if (sw.ElapsedMilliseconds > 1000)
+                while (picFlag)
                 {
-                    sw.Restart();
-                    textBoxTimeShow.Text = "fps：" + fps;
-                    fps = 0;
-                }
 
+                    try
+                    {
+                        Thread.Sleep(dynamicTime);
+                        // Console.WriteLine("screenCopyThread***********");
+                        if (isWin8Above)//above win8 version
+                        {
+                            /**采用DXGI形式获取桌面，只能使用在win8以上系统，效率比较高，用来代替Mirror Driver*/
+                            DesktopFrame frame = CopyScreen.getScreenPicDXGI();
+                            if (frame != null)
+                            {
+                                if (nullFrame)
+                                {
+                                    //第一针总是黑屏，所以直接舍弃
+                                    nullFrame = false;
+                                    continue;
+                                }
+                                fps++;
+                                BitmapWithCursor bitmapWithCursor = new BitmapWithCursor();
+                                bitmapWithCursor.setCursorPoint(new ShortPoint(System.Windows.Forms.Cursor.Position.X, System.Windows.Forms.Cursor.Position.Y));
+                                bitmapWithCursor.setScreenBitmap(frame.DesktopImage);
+                                bitmapWithCursor.dirtyRecs = frame.UpdatedRegions;
+                                screenCopyQueue.Enqueue(bitmapWithCursor);
+                                textBoxCSQ.Text = "" + screenCopyQueue.getQueueSize();
+                            }
+
+                        }
+                        else//below win8 
+                        {
+                            int cursorX, cursorY;
+                            /* 采用的GDI形式获取桌面图形，效率比较低*/
+                            Bitmap btm = CopyScreen.getScreenPic(out cursorX, out cursorY);
+                            if (btm != null)
+                            {
+                                fps++;
+                                BitmapWithCursor bitmapWithCursor = new BitmapWithCursor();
+                                bitmapWithCursor.setCursorPoint(new ShortPoint(cursorX, cursorY));
+                                bitmapWithCursor.setScreenBitmap(btm);
+                                screenCopyQueue.Enqueue(bitmapWithCursor);
+                                textBoxCSQ.Text = "" + screenCopyQueue.getQueueSize();
+                            }
+                        }
+
+                        /**fps count*/
+                        if (sw.ElapsedMilliseconds > 1000)
+                        {
+                            sw.Restart();
+                            textBoxFPS.Text = "" + fps;
+                            fps = 0;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                        ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message);
+                        return;
+                    }
+                }
             }
-
-
-        }
-
-
-        /**开始发送截图，流水线开始工作*/
-        private void startSendPic()
-        {
-            isSendPic = true;
-            manualEvent.Set();
- 
-        }
-
-        /**停止发送截图，流水线停止工作*/
-        private void stopSendPic()
-        {
-            isSendPic = false;
-            manualEvent.Reset();
-
         }
 
         /**差异比较函数*/
@@ -350,77 +533,112 @@ namespace ControlServer1._0
          * 广域网一般40*40 或 20*20
          * 是否需要协商块的大小？？？？进一步实验决定。默认的事30*30
          **/
-        private static Size bitCmpSize = new Size(30, 30);
+        private static Size bitCmpSize =new Size(32,32);// new Size(30, 30);
         private static bool isFirstFrame = true;//用于第一比较帧的保存
         private static int keyFrameAdjusttimes = 0;
-    
         private static double VPT07 = 0.7;
-      
-
         private void bitmapCmpToBlockingQueue()
         {
-            //使用while，防止线程的伪唤醒
-            while (!isSendPic)
-            {   //客户端未请求图形时，阻塞，类似java中的object.wait()
-                manualEvent.WaitOne();
-            }
             while (isSendPic)
             {
-                BitmapWithCursor bitmapWithCursor=screenCopyQueue.Dequeue();
-                if (bitmapWithCursor != null)
+                while (!picFlag)
                 {
-                   // textBoxCopy.Text = "copy队列：" + screenCopyQueue.queue.Count;
-                    keyFrameAdjusttimes++;
-                    if (keyFrameAdjusttimes > 300)
+                    try
                     {
-                        keyFrameAdjusttimes = 0;
-                        sendKeyFrame();
+                        manulResetEvent.WaitOne();
                     }
-                    Bitmap btm1 = bitmapWithCursor.getScreenBitmap();
-                    if (isFirstFrame)
+                    catch (ThreadInterruptedException ex)
                     {
-                        upDateKeyFrame(btm1, bitmapWithCursor.getCursorPoint());
-                        isFirstFrame = false;
+                        manulResetEvent.Reset();
+                        Console.WriteLine(ex.Message);
+                        ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message);
+                        return;
                     }
-                    else
+                }
+                while (picFlag)
+                {
+                    BitmapWithCursor bitmapWithCursor = screenCopyQueue.Dequeue();
+
+                    if (bitmapWithCursor != null)
                     {
-                        Bitmap btm2 = globalComparerBitmap;
-                        List<ShortPoint> difPoints = BitmapCmp32Bit.CompareS(bitmapWithCursor.dirtyRecs, btm2, btm1,bitCmpSize);//BitmapCmp24Bit.CompareS(btm1, btm2, bitCmpSize);
-                        Bitmap sendPic = null;
-                        if (difPoints.Count > 0)
+                        // Console.WriteLine("btmCmpThread***********");
+                        try
                         {
-                            DifferentBitmapWithCursor differentBitmapWithCursor = new ScreenBitmap.DifferentBitmapWithCursor();
-                            double VPTNOW = (double)(CopyScreen.getReslution().Width * CopyScreen.getReslution().Height) / (bitCmpSize.Width * bitCmpSize.Height);
-                            if ((double)difPoints.Count >= VPT07*VPTNOW)//超过70%的改变，直接发送K帧
+                            //发送关键帧，校准
+                            //keyFrameAdjusttimes++;
+                            //if (keyFrameAdjusttimes > 300)
+                            //{
+                            //    keyFrameAdjusttimes = 0;
+                            //    sendKeyFrame();
+                            //}
+                            Bitmap btm1 = bitmapWithCursor.getScreenBitmap();
+                            if (isFirstFrame)
                             {
-                                sendPic = btm1;
-                                differentBitmapWithCursor.setBitmapType(SendPacket.BitmapType.COMPLETE);
-                               
+                                upDateKeyFrame(btm1, bitmapWithCursor.getCursorPoint());
+                                isFirstFrame = false;
                             }
-                            else 
+                            else
                             {
-                               // Stopwatch sw = new Stopwatch();
-                               // sw.Start();
-                                sendPic = GetDifBlocks.getBlocksIn1BitmapClone(difPoints, btm1, bitCmpSize);
-                               // sw.Stop();
-                               // Console.WriteLine(sw.ElapsedMilliseconds+"ms");
-                                differentBitmapWithCursor.setBitmapType(SendPacket.BitmapType.BLOCK);
-                                differentBitmapWithCursor.setDifPointsList(difPoints);
-                               
+                                Bitmap btm2 = globalComparerBitmap;
+
+                                List<ShortRec> difPoints = null;
+                                if (isWin8Above)
+                                {
+
+                                    // Stopwatch sw = new Stopwatch();
+                                    //sw.Start();
+                                    difPoints = BitmapCmp32Bit.Compare(bitmapWithCursor.dirtyRecs, btm2, btm1, bitCmpSize);
+                                    //sw.Stop();
+                                    //Console.WriteLine(sw.ElapsedMilliseconds+"ms");
+                                }
+                                else
+                                {
+                                    difPoints = BitmapCmp24Bit.Compare(btm1, btm2, bitCmpSize);
+                                }
+                                Bitmap sendPic = null;
+                                if (difPoints.Count > 0)
+                                {
+                                    DifferentBitmapWithCursor differentBitmapWithCursor = new ScreenBitmap.DifferentBitmapWithCursor();
+                                    double VPTNOW = (double)(CopyScreen.getReslution().Width * CopyScreen.getReslution().Height) / (bitCmpSize.Width * bitCmpSize.Height);
+                                    if ((double)difPoints.Count >= VPT07 * VPTNOW)//超过70%的改变，直接发送K帧
+                                    {
+                                        sendPic = btm1;
+                                        differentBitmapWithCursor.setBitmapType(SendPacket.BitmapType.COMPLETE);
+                                    }
+                                    else
+                                    {
+                                        //Stopwatch sw = new Stopwatch();
+                                        //sw.Start();
+                                        sendPic = GetDifBlocks.getBlocksIn1BitmapClone(difPoints, btm1, bitCmpSize);
+                                        //sw.Stop();
+                                        //Console.WriteLine(sw.ElapsedMilliseconds+"ms");
+                                        differentBitmapWithCursor.setBitmapType(SendPacket.BitmapType.BLOCK);
+                                        differentBitmapWithCursor.setDifPointsList(difPoints);
+
+                                    }
+                                    /**更新全局比较帧*/
+                                    globalComparerBitmap.Dispose();
+                                    globalComparerBitmap = (Bitmap)btm1.Clone();
+                                    differentBitmapWithCursor.setCursorPoint(bitmapWithCursor.getCursorPoint());
+                                    differentBitmapWithCursor.setDifBitmap(sendPic);
+
+
+                                    screenCopyDifQueue.Enqueue(differentBitmapWithCursor);
+                                    textBoxDBQ.Text = "" + screenCopyDifQueue.getQueueSize();
+
+                                }
                             }
 
-                            differentBitmapWithCursor.setCursorPoint(bitmapWithCursor.getCursorPoint());
-                            differentBitmapWithCursor.setDifBitmap(sendPic);
-
-
-                            screenCopyDifQueue.Enqueue(differentBitmapWithCursor);
-
-                            /**更新全局比较帧*/
-                            globalComparerBitmap = (Bitmap)btm1.Clone();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message);
+                            return;
                         }
                     }
-                   
                 }
+
             }
         }
 
@@ -435,6 +653,7 @@ namespace ControlServer1._0
             differentBitmapWithCursor.setCursorPoint(point);
             differentBitmapWithCursor.setDifBitmap(newKeyFrame);
             screenCopyDifQueue.Enqueue(differentBitmapWithCursor);
+            textBoxDBQ.Text = "" + screenCopyDifQueue.getQueueSize();
         }
 
         /**为了保证图像质量，可以每隔一段时间，发送一次关键帧进行图形矫正*/
@@ -448,134 +667,186 @@ namespace ControlServer1._0
         /**压缩函数*/
         private void bitmapZipToBlockingQueue()
         {
-             //使用while，防止线程的伪唤醒
-            while (!isSendPic)
-            {   //客户端未请求图形时，阻塞，类似java中的object.wait()
-                manualEvent.WaitOne();
-            }
             while (isSendPic)
             {
-                DifferentBitmapWithCursor differentBitmapWithCursor = screenCopyDifQueue.Dequeue();
-                if (differentBitmapWithCursor != null)
+                try
                 {
-                    textBoxDif.Text = "dif队列：" + screenCopyDifQueue.queue.Count;
-                    SendPacket sendPacket = new SendPacket();
-                    sendPacket.setBitmapType(differentBitmapWithCursor.getBitmapType());
-                    sendPacket.setCursorPoint(differentBitmapWithCursor.getCursorPoint());
-                    sendPacket.setDifPointsList(differentBitmapWithCursor.getDifPointsList());
-                    byte[] bmpBytes = JpegZip.jpegAndZip(differentBitmapWithCursor.getDifBitmap());
-
-                    /*
-                    MemoryStream msUnzip = new MemoryStream();
-                    ZipInputStream inZip = new ZipInputStream(new MemoryStream(bmpBytes));
-                    inZip.GetNextEntry();
-                    byte[] buf = new byte[8192];
-                    int size = 0;
-                    while (true)
-                    {
-                        size = inZip.Read(buf, 0, buf.Length);
-                        if (size == 0) break;
-                        msUnzip.Write(buf, 0, size);
-                    }
-                    msUnzip.Close();
-                    inZip.Close();
-                    MessageBox.Show("原来："+bmpBytes.Length+"现在："+msUnzip.ToArray().Length);
-                    */
-
-
-                    sendPacket.setBitByts(bmpBytes);
-                    sendPacket.setBitmapBytesLength(bmpBytes.Length);
-                    sendPacketQueue.Enqueue(sendPacket);
+                    manulResetEvent.WaitOne();
                 }
-               
+                catch (ThreadInterruptedException ex)
+                {
+                    manulResetEvent.Reset();
+                    Console.WriteLine(ex.Message);
+                    ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message);
+                    return;
+                }
+                while (picFlag)
+                {
+                   
+                    DifferentBitmapWithCursor differentBitmapWithCursor = screenCopyDifQueue.Dequeue();
+                    if (differentBitmapWithCursor != null)
+                    {
+                        // Console.WriteLine("compressThread***********");
+                        try
+                        {
+
+                            SendPacket sendPacket = new SendPacket();
+                            sendPacket.setPacketType(SendPacket.PacketType.BITMAP);
+                            sendPacket.setBitmapType(differentBitmapWithCursor.getBitmapType());
+                            sendPacket.setCursorPoint(differentBitmapWithCursor.getCursorPoint());
+                            sendPacket.setDifPointsList(differentBitmapWithCursor.getDifPointsList());
+                            byte[] bmpBytes = JpegZip.jpegAndZip(differentBitmapWithCursor.getDifBitmap());
+
+                            sendPacket.setBitByts(bmpBytes);
+                            sendPacket.setBitmapBytesLength(bmpBytes.Length);
+                            sendPacketQueue.Enqueue(sendPacket);
+                            textBoxSDQ.Text = sendPacketQueue.getQueueSize() + "";
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message);
+                            return;
+                        }
+                    }
+                }
+
             }
         }
 
 
-
-
-
-
-
-
-
-
-
-
-
-        private Bitmap BytesToBitmap(byte[] Bytes)
+        public void stopClient()
         {
-            MemoryStream stream = new MemoryStream(Bytes);
-            try
+            Console.WriteLine("client is close...");
+            isClientRun = false;
+            isSendPic = false;
+            stopSendPicFlags();
+            isFirstFrame = true;
+            if (clientSocket != null)
+                clientSocket.Close();
+
+            clientSocket = null;
+            stopSendPicThreads();
+            setClientCloseMessage();
+
+            if (sendPacketThread != null)
             {
-                Bitmap retmap = new Bitmap(stream);
-                //stream.Close();
-                return retmap;
+                sendPacketThread.Interrupt();
+                sendPacketThread.Abort();
+                if(sendPacketThread!=null)
+                sendPacketThread.Join();
+                sendPacketThread = null;
             }
-            catch
+            if (recPacketThread != null)
             {
-               // textBoxInfo.Text += "流数据转化图片错误\r\n";
-                stream.Close();
-
-                return null;
+                recPacketThread.Interrupt();
+                recPacketThread.Abort();
+                if(recPacketThread!=null)
+                recPacketThread.Join();
+                recPacketThread = null;
             }
-
-
-
-        }
-       
-
-      
-        private void buttonStartSendPic_Click(object sender, EventArgs e)
-        {
-
-            if (!isSendPic)
+            if (clientSocketHandlerThread != null)
             {
-                startSendPic();
-                buttonStartSendPic.Text = "停止发送";
-
+                clientSocketHandlerThread.Interrupt();
+                clientSocketHandlerThread.Abort();
+                if(clientSocketHandlerThread!=null)
+                clientSocketHandlerThread.Join();
+                clientSocketHandlerThread = null;
             }
-            else 
+            /**重新创建队列*/
+            screenCopyQueue = new BlockingQueue<BitmapWithCursor>(10);
+            screenCopyDifQueue = new BlockingQueue<DifferentBitmapWithCursor>(10);
+            sendPacketQueue = new BlockingQueue<SendPacket>(10);
+            recpacketQueue = new BlockingQueue<RecPacket>(10);
+
+        }
+
+        /**stop all the threads when exit or close the main serverSocket*/
+        private void stopAllThreads()
+        {
+            if (serverSocket != null)
             {
-                stopSendPic();
-                buttonStartSendPic.Text = "发送图像";
-
+                serverSocket.Close();
+                serverSocket = null;
+                isServerRun = false;
             }
-         }
-
-       
-        private void buttonLocalTest_Click(object sender, EventArgs e)
-        {
-
-            Tests.testALot(textBoxInfoShow,pictureBoxSender);
-            
+            if (clientSocket != null)
+            {
+                stopClient();
+            }
+            isServerRun = false;
+            if (serverSocketThread != null)
+            {
+                serverSocketThread.Interrupt();
+                serverSocketThread.Abort();
+                if(sendPacketThread!=null)
+                serverSocketThread.Join();
+                serverSocketThread = null;
+            }
         }
 
-        private void buttonBitBltTest_Click(object sender, EventArgs e)
+
+
+        private Point mousePoint;
+        private int topA(Control cc)
         {
-            Tests.testBitBlt(textBoxInfoShow, pictureBoxSender);
+            if (cc == null || cc == this) return 0;
+            if (cc.Parent == null || cc.Parent == this)
+                return cc.Top;
+            else
+                return topA(cc.Parent) + cc.Top;
+        }
+        private int leftA(Control cc)
+        {
+            if (cc == null || cc == this) return 0;
+            if (cc.Parent == null || cc.Parent == this)
+                return cc.Left;
+            else
+                return leftA(cc.Parent) + cc.Left;
+        }
+        private void top_MouseDown(object sender, MouseEventArgs e)
+        {
+            Control cc = (Control)sender;
+            if (e.Button == MouseButtons.Left)
+            {
+                mousePoint.X = e.X + leftA(cc);
+                mousePoint.Y = e.Y + topA(cc);
+            }
+        }
+        private void top_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                Top = MousePosition.Y - mousePoint.Y;
+                Left = MousePosition.X - mousePoint.X;
+            }
         }
 
-        private void buttonAverageTest_Click(object sender, EventArgs e)
+        private void buttonClose_Click(object sender, EventArgs e)
         {
-            Tests.testaverageExpend(textBoxInfoShow, pictureBoxSender);
+
+            // stopAllThreads();
+            this.Controls.Clear();
+            this.Close();
+            stopAllThreads();
+            Application.Exit();
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
+        private void buttonMin_Click(object sender, EventArgs e)
+        {
+            this.WindowState = System.Windows.Forms.FormWindowState.Minimized;
+        }
+
+        private void timerGC_Tick(object sender, EventArgs e)
         {
             GC.Collect();
         }
 
 
 
-      
 
-       
-        
-       
 
-        
     }
 
-    
+
 }

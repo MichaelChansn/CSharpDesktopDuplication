@@ -1,0 +1,1 @@
+please copy these lib files into your running floder like release or debug floder.
