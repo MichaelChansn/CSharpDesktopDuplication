@@ -107,7 +107,7 @@ namespace ControlServer1._0.DataPacket
             FUN+LOCK+OK+6                 锁定计算机
             FUN+SHUTDOWNTIME+VALUE+OK      在VALUE秒后关机
             FUN+SHUTDOWNCANCEL+OK+7         取消关机
-
+            FUN_SHOW_DESKTOP               显示桌面
 
             游戏手柄控制信息：
             GAME+UP_DOWN+OK+1             上，按下

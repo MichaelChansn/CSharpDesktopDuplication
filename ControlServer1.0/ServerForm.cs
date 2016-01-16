@@ -111,6 +111,7 @@ namespace ControlServer1._0
                     string[] rec = returnData.Split(ENUMS.NETSEPARATOR.ToCharArray(),StringSplitOptions.RemoveEmptyEntries);
                     if (rec[0] == ENUMS.UDPSCANMESSAGE && rec.Length==2)
                     {
+                        this.setMessageHost(rec[1]+" Scanning...");
                         Console.WriteLine(rec[1] + ":" + RemoteIpEndPoint.ToString());
                         byte[] buf = Encoding.UTF8.GetBytes(ENUMS.UDPSCANRETURN+ENUMS.NETSEPARATOR+System.Environment.UserName + ENUMS.NETSEPARATOR + TCP_PORT);
                         udpClient.Send(buf, buf.Length, RemoteIpEndPoint);
@@ -187,6 +188,11 @@ namespace ControlServer1._0
         public void setMessageHost(String message)
         {
             textBoxHost.Text = message;
+        }
+        public void setClientCloseMessage()
+        {
+            textBoxHost.Text = "Client Off Line";
+            textBoxAddr.Text = "No Client On Line";
         }
         /**
          * 服务线程，用来接收链接
@@ -527,7 +533,7 @@ namespace ControlServer1._0
          * 广域网一般40*40 或 20*20
          * 是否需要协商块的大小？？？？进一步实验决定。默认的事30*30
          **/
-        private static Size bitCmpSize =new Size(16,16);// new Size(30, 30);
+        private static Size bitCmpSize =new Size(32,32);// new Size(30, 30);
         private static bool isFirstFrame = true;//用于第一比较帧的保存
         private static int keyFrameAdjusttimes = 0;
         private static double VPT07 = 0.7;
@@ -711,6 +717,7 @@ namespace ControlServer1._0
 
         public void stopClient()
         {
+            Console.WriteLine("client is close...");
             isClientRun = false;
             isSendPic = false;
             stopSendPicFlags();
@@ -720,7 +727,7 @@ namespace ControlServer1._0
 
             clientSocket = null;
             stopSendPicThreads();
-           
+            setClientCloseMessage();
 
             if (sendPacketThread != null)
             {
