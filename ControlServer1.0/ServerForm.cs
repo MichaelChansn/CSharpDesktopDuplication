@@ -99,7 +99,15 @@ namespace ControlServer1._0
         }
         void udpReceive()
         {
-            udpClient = new UdpClient(UDP_PORT);
+             try
+            {
+                udpClient = new UdpClient(UDP_PORT);
+            }
+            catch (SocketException se)
+            {
+                MessageBox.Show("UDP Scan Thread Is Crashed\r\n"+se.Message, "UDP ERROR");
+                return;
+            }
             IPEndPoint RemoteIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
             while (isServerRun)
             {
@@ -141,42 +149,51 @@ namespace ControlServer1._0
         {
             if (!isServerRun)
             {
-                isServerRun = true;
-                startUDPReceiverThread();
-                serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                serverSocket.Bind(new IPEndPoint(IPAddress.Any, TCP_PORT));
-                serverSocket.Blocking = true;
-                serverSocket.Listen(5);
+                try
+                {
+                    isServerRun = true;
+                    startUDPReceiverThread();
+                    serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                    serverSocket.Bind(new IPEndPoint(IPAddress.Any, TCP_PORT));
+                    serverSocket.Blocking = true;
+                    serverSocket.Listen(5);
 
-                serverSocketThread = new Thread(new ParameterizedThreadStart(serverSocketFun));
-                serverSocketThread.Priority = ThreadPriority.Lowest;
-                serverSocketThread.IsBackground = true;
-                serverSocketThread.Start(serverSocket);
+                    serverSocketThread = new Thread(new ParameterizedThreadStart(serverSocketFun));
+                    serverSocketThread.Priority = ThreadPriority.Lowest;
+                    serverSocketThread.IsBackground = true;
+                    serverSocketThread.Start(serverSocket);
 
-                textBoxHost.Text = "SERVER IS RUNNING...";
-                textBoxAddr.Text = "WAIT FOR CLIENT...";
-                buttonServer.Text = "STOP SERVER";
-                this.buttonServer.BackColor = System.Drawing.Color.Red;
-                this.buttonServer.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(158)))), ((int)(((byte)(146)))));
-                this.buttonServer.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(158)))), ((int)(((byte)(146)))));
+                    textBoxHost.Text = "SERVER IS RUNNING...";
+                    textBoxAddr.Text = "WAIT FOR CLIENT...";
+                    buttonServer.Text = "STOP SERVER";
+                    this.buttonServer.BackColor = System.Drawing.Color.Red;
+                    this.buttonServer.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(158)))), ((int)(((byte)(146)))));
+                    this.buttonServer.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(158)))), ((int)(((byte)(146)))));
+                }
+                catch (SocketException se)
+                {
+                    isServerRun = false;
+                    MessageBox.Show("TCP Server Is Crashed\r\n" + se.Message, "ERROR!", MessageBoxButtons.OK);
+                    ErrorInfo.getErrorWriter().writeErrorMassageToFile(se.Message);
+                }
             }
             else
             {
+                try
+                {
                 isServerRun = false;
                 stopUDP();
+                stopAllThreads();
                 buttonServer.Text = "START SERVER";
                 textBoxHost.Text = "SERVER IS CLOSE...";
                 textBoxAddr.Text = "";
                 this.buttonServer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(158)))), ((int)(((byte)(146)))));
                 this.buttonServer.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Red;
                 this.buttonServer.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Red;
-                try
-                {
-                    stopAllThreads();
-
                 }
-                catch (SocketException se)
+                catch (Exception se)
                 {
+                    isServerRun = true;
                     Console.WriteLine(se.Message);
                     ErrorInfo.getErrorWriter().writeErrorMassageToFile(se.Message);
                 }
@@ -206,7 +223,11 @@ namespace ControlServer1._0
                     Socket client = ((Socket)serverSocket).Accept();
                     if (clientSocket != null)
                     {
+                        sendMessage2Client("you are kicked off by other people!");
+                        Thread.Sleep(100);//wait for last message
                         stopClient();
+                        Thread.Sleep(100);//wait for clean socket
+
 
                     }
                     clientSocket = client;

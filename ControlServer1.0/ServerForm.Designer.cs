@@ -379,7 +379,7 @@ namespace ControlServer1._0
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "ServerForm";
-            this.Text = "Form1";
+            this.Text = "服务端";
             this.panelTop.ResumeLayout(false);
             this.panelTop.PerformLayout();
             this.panelBackground.ResumeLayout(false);

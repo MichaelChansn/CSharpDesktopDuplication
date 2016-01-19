@@ -14,14 +14,15 @@ namespace ControlServer1._0.BitmapTools
 {
     class JpegZip
     {
-       
+
+        private static LZOCompressor lzoCompress = new LZOCompressor();
         public static byte[] jpegAndZip(Bitmap btm)
         {
             MemoryStream msIzip = new MemoryStream();
             MemoryStream ms = new MemoryStream();
             btm.Save(ms, ImageFormat.Jpeg);
             ms.Close();
-            byte[] retByte=(new LZOCompressor()).Compress(ms.ToArray());
+            byte[] retByte = lzoCompress.Compress(ms.ToArray());
             /*zip compress ,it is cost too much cpu ,so we do not use this compress way.
             ZipOutputStream outZip = new ZipOutputStream(msIzip);
             outZip.SetLevel(9);

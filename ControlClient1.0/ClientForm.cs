@@ -29,6 +29,7 @@ namespace ControlClient1._0
         {
             InitializeComponent();
             System.Windows.Forms.Control.CheckForIllegalCrossThreadCalls = false;
+            
         }
         private static Socket clientSocket = null;
         
@@ -69,6 +70,12 @@ namespace ControlClient1._0
         private static NetworkStream streamW =null; 
         private static BinaryWriter writer = null;
 
+        private float scaleX = 1.0f;
+        private float scaleY = 1.0f;
+        private int bitmapWidth = 1;
+        private int bitmapHeight = 1;
+        
+
        
        
 
@@ -83,6 +90,7 @@ namespace ControlClient1._0
                     {
                         try
                         {
+                            isConnect = true;
                             clientSocket = new Socket(AddressFamily.InterNetwork,SocketType.Stream,ProtocolType.Tcp);
                             clientSocket.Blocking=true;
                             clientSocket.Connect(IPAddress.Parse(IPAndport[0]), Convert.ToInt32(IPAndport[1]));
@@ -90,14 +98,14 @@ namespace ControlClient1._0
                             clientSocketHandlerThread.IsBackground = true;
                             clientSocketHandlerThread.Priority = ThreadPriority.Normal;
                             clientSocketHandlerThread.Start(clientSocket);
-                            
                             buttonConnect.Text = "断开链接";
 
                         }
                         catch(Exception ex)
                         {
+                            isConnect = false;
+                            MessageBox.Show(ex.Message);
                             Console.WriteLine(ex.Message);
-                            Console.WriteLine(ex.StackTrace);
                             ErrorInfo.getErrorWriter().writeErrorMassageToFile(ex.Message + "\r\n" + ex.StackTrace);
                         }
                     }
@@ -105,29 +113,38 @@ namespace ControlClient1._0
             }
             else
             {
-                isConnect = false;
-                stopRecPic();
-                recPacketThread.Interrupt();
-                sendPacketThread.Interrupt();
-                deCompressThread.Interrupt();
-                recoverBitmapThread.Interrupt();
-                displayBitmapThread.Interrupt();
-
-
+                stopClient();
                 buttonConnect.Text = "链接服务器";
-                clientSocket.Close();
+                
             }
         }
 
-        
+        private void stopClient()
+        {
+            
+            stopRecPic();
+            isConnect = false;
+            recPacketThread.Interrupt();
+            sendPacketThread.Interrupt();
+            deCompressThread.Interrupt();
+            recoverBitmapThread.Interrupt();
+            displayBitmapThread.Interrupt();
+            if (clientSocket != null)
+            {
+                clientSocket.Close();
+                clientSocket = null;
+            }
+            recPacketQueue.clearQueue();
+            deCompressDifQueue.clearQueue();
+            displayQueue.clearQueue();
+            buttonConnect.Text = "链接服务器";
+
+        }
         /**接收线程*/
         private void clientSockethandlerFun(object client)
         {
 
-                isConnect = true;
                 /**开启各种工作线程*/
-
-                
                 /*1*数据接收线程*/
                 recPacketThread = new Thread(new ParameterizedThreadStart(recPacketFun));
                 recPacketThread.Priority = ThreadPriority.Normal;
@@ -157,14 +174,13 @@ namespace ControlClient1._0
                 displayBitmapThread.Priority = ThreadPriority.Normal;
                 displayBitmapThread.IsBackground = true;
                 displayBitmapThread.Start();
-
                 startRecPic();
                
                
             
         }
        
-
+        
 
         /**数据接收函数*/
         private void recPacketFun(object clientSocket)
@@ -209,7 +225,6 @@ namespace ControlClient1._0
                                 {
                                     size += reader.Read(getBitmapBytes, size, bitmapBytesLen - size);
                                 }
-//                                byte[] getBitmapBytes = reader.ReadBytes(bitmapBytesLen);
 
                                 /**组装数据*/
                                 recpacket.setBitByts(getBitmapBytes);
@@ -242,9 +257,12 @@ namespace ControlClient1._0
                 }
                 catch (Exception ex)
                 {
+                    MessageBox.Show(ex.Message);
+                    stopClient();
                     Console.WriteLine(ex.Message);
                     Console.WriteLine(ex.StackTrace);
                     ErrorInfo.getErrorWriter().writeErrorMassageToFile(DateTime.Now.ToString()+":"+ex.Message + "\r\n" + ex.StackTrace);
+
                 }
 
             }
@@ -256,10 +274,8 @@ namespace ControlClient1._0
         /**数据发送函数*/
         private void sendPacketFun(object client)
         {
-           
              streamW = new NetworkStream((Socket)client);
              writer = new BinaryWriter(streamW);
-            //TODO
 
         }
 
@@ -270,55 +286,46 @@ namespace ControlClient1._0
         {
             while (isConnect)
             {
-                RecPacket recPacket = recPacketQueue.Dequeue();
-                if (recPacket != null)
+                try
                 {
-                    RecPacket.PacketType packetType = recPacket.getPacketType();
-                    DifferentBitmapWithCursor difbitWithCur = new DifferentBitmapWithCursor();
-                    difbitWithCur.setPacketType(packetType);
-                    switch(packetType)
+                    RecPacket recPacket = recPacketQueue.Dequeue();
+                    LZOCompressor lzoCompress = new LZOCompressor();
+                    if (recPacket != null)
                     {
-                        case RecPacket.PacketType.BITMAP:
-                            difbitWithCur.setBitmapType(recPacket.getBitmapType());
-                            difbitWithCur.setCursorPoint(recPacket.getCursorPoint());
-                            difbitWithCur.setDifPointsList(recPacket.getDifPointsList());
-                            byte[] dataBytes = recPacket.getBitByts();
-                            byte[] getByte=new LZOCompressor().Decompress(dataBytes);
-                            Bitmap temp = (Bitmap)Bitmap.FromStream(new MemoryStream(getByte));
-                            difbitWithCur.setDifBitmap(temp);
-                            /*
-                            MemoryStream msUnzip = new MemoryStream();
-                            ZipInputStream inZip = new ZipInputStream(new MemoryStream(dataBytes));
-                            inZip.GetNextEntry();
-                            byte[] buf = new byte[8192];
-                            int size = 0;
-                            while (true)
-                            {
-                                size = inZip.Read(buf, 0, buf.Length);
-                                if (size == 0) break;
-                                msUnzip.Write(buf, 0, size);
-                            }
-                            //msUnzip.Close();
-                            inZip.CloseEntry();
-                            inZip.Close();
-                            Bitmap btm = new Bitmap(msUnzip,true);
-                            difbitWithCur.setDifBitmap(btm);
-                            */
-                            /**放入差异队列*/
-                            deCompressDifQueue.Enqueue(difbitWithCur);
-                            labelDif.Text = "差异队列大小：" + deCompressDifQueue.getQueueSize()+ "\r\n";
-                            break;
-                        case RecPacket.PacketType.TEXT:
-                            difbitWithCur.setStringValue(recPacket.getStringValue());
-                            deCompressDifQueue.Enqueue(difbitWithCur);
-                            labelDif.Text = "差异队列大小：" + deCompressDifQueue.getQueueSize()+ "\r\n";
-                            break;
-                        default:
-                            break;
+                        RecPacket.PacketType packetType = recPacket.getPacketType();
+                        DifferentBitmapWithCursor difbitWithCur = new DifferentBitmapWithCursor();
+                        difbitWithCur.setPacketType(packetType);
+                        switch (packetType)
+                        {
+                            case RecPacket.PacketType.BITMAP:
+                                difbitWithCur.setBitmapType(recPacket.getBitmapType());
+                                difbitWithCur.setCursorPoint(recPacket.getCursorPoint());
+                                difbitWithCur.setDifPointsList(recPacket.getDifPointsList());
+                                byte[] dataBytes = recPacket.getBitByts();
+                                byte[] getByte = lzoCompress.Decompress(dataBytes);
+                                Bitmap temp = (Bitmap)Bitmap.FromStream(new MemoryStream(getByte));
+
+                                difbitWithCur.setDifBitmap(temp);
+                                /**放入差异队列*/
+                                deCompressDifQueue.Enqueue(difbitWithCur);
+                                labelDif.Text = "差异队列大小：" + deCompressDifQueue.getQueueSize() + "\r\n";
+                                break;
+                            case RecPacket.PacketType.TEXT:
+                                difbitWithCur.setStringValue(recPacket.getStringValue());
+                                deCompressDifQueue.Enqueue(difbitWithCur);
+                                labelDif.Text = "差异队列大小：" + deCompressDifQueue.getQueueSize() + "\r\n";
+                                break;
+                            default:
+                                break;
+
+                        }
+
 
                     }
-                   
-
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
                 }
             }
  
@@ -338,52 +345,59 @@ namespace ControlClient1._0
         {
             while (isConnect)
             {
-                DifferentBitmapWithCursor difbitWithCur = deCompressDifQueue.Dequeue();
-                if (difbitWithCur != null)
+                try
                 {
-                    RecPacket.PacketType packetType = difbitWithCur.getPacketType();
-                    BitmapWithCursor bitmapWithCursor = new BitmapWithCursor();
-                    bitmapWithCursor.setPacketType(packetType);
-                    switch (packetType)
+                    DifferentBitmapWithCursor difbitWithCur = deCompressDifQueue.Dequeue();
+                    if (difbitWithCur != null)
                     {
-                        case RecPacket.PacketType.BITMAP:
-                            RecPacket.BitmapType type=difbitWithCur.getBitmapType();
-                            ShortPoint cursorpoint = difbitWithCur.getCursorPoint();
-                            Bitmap btm=difbitWithCur.getDifBitmap();
-                            List<ShortRec> difPoints = difbitWithCur.getDifPointsList();
-                            switch (type)
-                            {
-                                case RecPacket.BitmapType.BLOCK:
-                                    //Stopwatch sw = new Stopwatch();
-                                    //sw.Start();
-                                    Bitmap recBitmap = RecoverBitmap.recoverScreenBitmap(difPoints, globalCompareBitmap, btm/*, bitCmpSize*/);
-                                    //sw.Stop();
-                                    //Console.WriteLine("client:"+sw.ElapsedMilliseconds+"ms");
-                                    bitmapWithCursor.setCursorPoint(cursorpoint);
-                                    bitmapWithCursor.setScreenBitmap(recBitmap);
-                                    globalCompareBitmap = (Bitmap)recBitmap.Clone();
-                                    /**放到显示队列*/
-                                    displayQueue.Enqueue(bitmapWithCursor);
-                                    break;
-                                case RecPacket.BitmapType.COMPLETE:
-                                    updateKeyFrame(btm, cursorpoint);
-                                    break;
-                                default:
-                                    break;
-                            }
-                            labeldispalyQueue.Text = "显示队列大小：" + displayQueue.getQueueSize()+ "\r\n";
-                            break;
-                        case RecPacket.PacketType.TEXT:
-                            bitmapWithCursor.setStringValue(difbitWithCur.getStringValue());
-                            displayQueue.Enqueue(bitmapWithCursor);
-                            labeldispalyQueue.Text = "显示队列大小：" + displayQueue.getQueueSize() + "\r\n";
-                            break;
-                        default:
-                            break;
+                        RecPacket.PacketType packetType = difbitWithCur.getPacketType();
+                        BitmapWithCursor bitmapWithCursor = new BitmapWithCursor();
+                        bitmapWithCursor.setPacketType(packetType);
+                        switch (packetType)
+                        {
+                            case RecPacket.PacketType.BITMAP:
+                                RecPacket.BitmapType type = difbitWithCur.getBitmapType();
+                                ShortPoint cursorpoint = difbitWithCur.getCursorPoint();
+                                Bitmap btm = difbitWithCur.getDifBitmap();
+                                List<ShortRec> difPoints = difbitWithCur.getDifPointsList();
+                                switch (type)
+                                {
+                                    case RecPacket.BitmapType.BLOCK:
+                                        //Stopwatch sw = new Stopwatch();
+                                        //sw.Start();
+                                        Bitmap recBitmap = RecoverBitmap.recoverScreenBitmap(difPoints, globalCompareBitmap, btm/*, bitCmpSize*/);
+                                        //sw.Stop();
+                                        //Console.WriteLine("client:"+sw.ElapsedMilliseconds+"ms");
+                                        bitmapWithCursor.setCursorPoint(cursorpoint);
+                                        bitmapWithCursor.setScreenBitmap(recBitmap);
+                                        globalCompareBitmap = (Bitmap)recBitmap.Clone();
+                                        /**放到显示队列*/
+                                        displayQueue.Enqueue(bitmapWithCursor);
+                                        break;
+                                    case RecPacket.BitmapType.COMPLETE:
+                                        updateKeyFrame(btm, cursorpoint);
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                labeldispalyQueue.Text = "显示队列大小：" + displayQueue.getQueueSize() + "\r\n";
+                                break;
+                            case RecPacket.PacketType.TEXT:
+                                bitmapWithCursor.setStringValue(difbitWithCur.getStringValue());
+                                displayQueue.Enqueue(bitmapWithCursor);
+                                labeldispalyQueue.Text = "显示队列大小：" + displayQueue.getQueueSize() + "\r\n";
+                                break;
+                            default:
+                                break;
+                        }
+
+
+
                     }
-                   
-
-
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
                 }
             }
  
@@ -412,36 +426,46 @@ namespace ControlClient1._0
         {
             while (isConnect)
             {
-                BitmapWithCursor bitmapWithCursor = displayQueue.Dequeue();
-                if (bitmapWithCursor != null)
+                try
                 {
-                    RecPacket.PacketType packetType = bitmapWithCursor.getPacketType();
-                    switch (packetType)
+                    BitmapWithCursor bitmapWithCursor = displayQueue.Dequeue();
+                    if (bitmapWithCursor != null)
                     {
-                        case RecPacket.PacketType.BITMAP:
-                            Bitmap display = bitmapWithCursor.getScreenBitmap();
-                            Point cursorPoint = new Point(bitmapWithCursor.getCursorPoint().getXPoint(), bitmapWithCursor.getCursorPoint().getYPoint());
-                            using (Graphics g = Graphics.FromImage(bitmapWithCursor.getScreenBitmap()))
-                            {
-                                Cursor myCursor = Cursor.Current;
+                        RecPacket.PacketType packetType = bitmapWithCursor.getPacketType();
+                        switch (packetType)
+                        {
+                            case RecPacket.PacketType.BITMAP:
+                                Bitmap display = bitmapWithCursor.getScreenBitmap();
+                                // Point cursorPoint = new Point(bitmapWithCursor.getCursorPoint().getXPoint(), bitmapWithCursor.getCursorPoint().getYPoint());
+                                //using (Graphics g = Graphics.FromImage(bitmapWithCursor.getScreenBitmap()))
+                                //{
+                                //    Cursor myCursor = Cursor.Current;
 
-                                myCursor.Draw(g, new Rectangle(cursorPoint, new Size(10, 10)));
-                                g.Dispose();
-                            }
-                            pictureBoxRec.BackgroundImage = display;
-                            labeldispalyQueue.Text = "显示队列大小：" + displayQueue.getQueueSize()+ "\r\n";
-                            break;
-                        case RecPacket.PacketType.TEXT:
-                            textBoxInfo.Text = bitmapWithCursor.getStringValue();
-                            labeldispalyQueue.Text = "显示队列大小：" + displayQueue.getQueueSize() + "\r\n";
-                            break;
-                        default:
-                            break;
+                                //    myCursor.Draw(g, new Rectangle(cursorPoint, new Size(10, 10)));
+                                //    g.Dispose();
+                                //}
+                                bitmapWidth = display.Width;
+                                bitmapHeight = display.Height;
+                                scaleX = (float)pictureBoxRec.Width / bitmapWidth;
+                                scaleY = (float)pictureBoxRec.Height / bitmapHeight;
+                                pictureBoxRec.BackgroundImage = display;
+                                labeldispalyQueue.Text = "显示队列大小：" + displayQueue.getQueueSize() + "\r\n";
+                                break;
+                            case RecPacket.PacketType.TEXT:
+                                textBoxInfo.Text = bitmapWithCursor.getStringValue();
+                                labeldispalyQueue.Text = "显示队列大小：" + displayQueue.getQueueSize() + "\r\n";
+                                break;
+                            default:
+                                break;
+
+                        }
 
                     }
-                   
                 }
-               
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
  
             }
         }
@@ -453,10 +477,6 @@ namespace ControlClient1._0
             GC.Collect();
         }
 
-        private void textBoxInfo_TextChanged(object sender, EventArgs e)
-        {
-
-        }
 
         /**
          * message format:type+value;
@@ -465,53 +485,39 @@ namespace ControlClient1._0
 
         private void startRecPic()
         {
-            byte messageType = (byte)0x10;
-            writer.Write(messageType);
-            writer.Flush();
+            if (isConnect)
+            {
+                try
+                {
+                    byte messageType = (byte)0x10;
+                    writer.Write(messageType);
+                    writer.Flush();
+                }
+                catch (Exception se)
+                {
+                    MessageBox.Show(se.Message);
+                    stopClient();
+                }
+            }
  
         }
         private void stopRecPic()
         {
-            byte messageType = (byte)0x11;
-            writer.Write(messageType);
-            writer.Flush();
-
-        }
-        private void button1_Click(object sender, EventArgs e)
-        {
             if (isConnect)
             {
-                
-                String message = textBoxInfo.Text;
-                String[] cmds = message.Split('+');
-                if (cmds.Length == 1)
+                try
                 {
-                    byte messageType = Byte.Parse(cmds[0]);
+                    byte messageType = (byte)0x11;
                     writer.Write(messageType);
                     writer.Flush();
                 }
-                else if (cmds.Length == 2)
+                catch(Exception se)
                 {
-                    byte messageType = Byte.Parse(cmds[0]);
-                    int textLen = cmds[1].Length;
-                    writer.Write(messageType);
-                    writer.Write(small2Big(textLen));
-                    writer.Write(Encoding.UTF8.GetBytes(cmds[1]));
-                    writer.Flush();
-                } if (cmds.Length == 3)
-                {
-                    byte messageType = Byte.Parse(cmds[0]);
-                    int intValue1 = Convert.ToInt32(cmds[1]);
-                    int intValue2 = Convert.ToInt32(cmds[2]);
-                    writer.Write(messageType);
-                    writer.Write(small2Big(intValue1));
-                    writer.Write(small2Big(intValue2));
-                    writer.Flush();
+                    MessageBox.Show(se.Message);
+                    //stopClient();
                 }
-
-                
-
             }
+
         }
         private static int small2Big(int bigInt)
         {
@@ -523,5 +529,219 @@ namespace ControlClient1._0
             ret = ((b1 & 0x000000ff) << 24) | ((b2 & 0x000000ff) << 16) | ((b3 & 0x000000ff) << 8) | (b4 & 0x000000ff);
             return ret;
         }
+
+        
+        private void pictureBoxRec_MouseClick(object sender, MouseEventArgs e)
+        {
+
+            pictureBoxRec.Focus();
+            if (isConnect)
+            {
+                try
+                {
+                    if (e.Button == MouseButtons.Left)
+                    {
+                        byte messageType = (byte)ENUMS.MESSAGETYPE.MOUSE_LEFT_CLICK;
+                        writer.Write(messageType);
+                        writer.Flush();
+                    }
+                    else if (e.Button == MouseButtons.Right)
+                    {
+                        byte messageType = (byte)ENUMS.MESSAGETYPE.MOUSE_RIGHT_CLICK;
+                        writer.Write(messageType);
+                        writer.Flush();
+                    }
+                }
+                catch(Exception se )
+                {
+                    MessageBox.Show(se.Message);
+                    stopClient();
+                }
+            }
+
+        }
+
+        private void pictureBoxRec_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            pictureBoxRec.Focus();
+            if (isConnect)
+            {
+                try
+                {
+                    if (e.Button == MouseButtons.Left)
+                    {
+                        byte messageType = (byte)ENUMS.MESSAGETYPE.MOUSE_LEFT_DOUBLE_CLICK;
+                        writer.Write(messageType);
+                        writer.Flush();
+                    }
+                    else if (e.Button == MouseButtons.Right)
+                    {
+                        byte messageType = (byte)ENUMS.MESSAGETYPE.MOUSE_RIGHT_DOUBLE_CLICK;
+                        writer.Write(messageType);
+                        writer.Flush();
+                    }
+                }
+                catch (Exception se)
+                {
+                    MessageBox.Show(se.Message);
+                    stopClient();
+                }
+            }
+        }
+
+        private void pictureBoxRec_MouseDown(object sender, MouseEventArgs e)
+        {
+            pictureBoxRec.Focus();
+            if (isConnect)
+            {
+                try
+                {
+                    if (e.Button == MouseButtons.Left)
+                    {
+                        byte messageType2 = (byte)ENUMS.MESSAGETYPE.MOUSE_LEFT_DOWN;
+                        writer.Write(messageType2);
+                        writer.Flush();
+                    }
+                    else if (e.Button == MouseButtons.Right)
+                    {
+                        byte messageType2 = (byte)ENUMS.MESSAGETYPE.MOUSE_RIGHT_DOWN;
+                        writer.Write(messageType2);
+                        writer.Flush();
+                    }
+                }
+                catch (Exception se)
+                {
+                    MessageBox.Show(se.Message);
+                    stopClient();
+                }
+            }
+        }
+
+        private void pictureBoxRec_MouseUp(object sender, MouseEventArgs e)
+        {
+            pictureBoxRec.Focus();
+            
+            if (isConnect)
+            {
+                try
+                {
+                    if (e.Button == MouseButtons.Left)
+                    {
+                        byte messageType = (byte)ENUMS.MESSAGETYPE.MOUSE_LEFT_UP;
+                        writer.Write(messageType);
+                        writer.Flush();
+                    }
+                    else if (e.Button == MouseButtons.Right)
+                    {
+                        byte messageType = (byte)ENUMS.MESSAGETYPE.MOUSE_RIGHT_UP;
+                        writer.Write(messageType);
+                        writer.Flush();
+                    }
+                }
+                catch (Exception se)
+                {
+                    MessageBox.Show(se.Message);
+                    stopClient();
+                }
+            }
+        }
+        private void pictureBoxRec_MouseWheel(object sender, MouseEventArgs e)
+        {
+            pictureBoxRec.Focus();
+            if (isConnect)
+            {
+                try
+                {
+                    int wheel = e.Delta;
+                    byte messageType = (byte)ENUMS.MESSAGETYPE.MOUSE_WHEEL;
+                    writer.Write(messageType);
+                    writer.Write(small2Big(wheel));
+                    writer.Flush();
+                }
+                catch (Exception se)
+                {
+                    MessageBox.Show(se.Message);
+                    stopClient();
+                }
+            }
+        }
+        private void pictureBoxRec_MouseMove(object sender, MouseEventArgs e)
+        {
+            pictureBoxRec.Focus();
+            if (isConnect)
+            {
+                try
+                {
+                    int realX = (int)((float)e.X / scaleX);
+                    int realY = (int)((float)e.Y / scaleY);
+                    byte messageType = (byte)ENUMS.MESSAGETYPE.MOUSE_SET;
+                    writer.Write(messageType);
+                    writer.Write(small2Big(realX));
+                    writer.Write(small2Big(realY));
+                    writer.Flush();
+                }
+                catch (Exception se)
+                {
+                    MessageBox.Show(se.Message);
+                    stopClient();
+                }
+            }
+        }
+
+        
+        private void pictureBoxRec_SizeChanged(object sender, EventArgs e)
+        {
+            pictureBoxRec.Focus();
+            scaleX = (float)pictureBoxRec.Width / bitmapWidth;
+            scaleY = (float)pictureBoxRec.Height / bitmapHeight;
+        }
+
+        private void pictureBoxRec_Resize(object sender, EventArgs e)
+        {
+            pictureBoxRec.Focus();
+            scaleX = (float)pictureBoxRec.Width / bitmapWidth;
+            scaleY = (float)pictureBoxRec.Height / bitmapHeight;
+        }
+
+        private void pictureBoxRec_KeyDown(object sender, KeyEventArgs e)
+        {
+            Console.WriteLine("key:" + e.KeyValue + "keyvalue:" + e.KeyValue + "keyData:" + e.KeyData);
+            if (isConnect)
+            {
+                try
+                {
+                    byte messageType = (byte)ENUMS.MESSAGETYPE.BOARDKEY_DOWN;
+                    writer.Write(messageType);
+                    writer.Write((byte)e.KeyCode);
+                    writer.Flush();
+                }
+                catch (Exception se)
+                {
+                    MessageBox.Show(se.Message);
+                    stopClient();
+                }
+            }
+        }
+
+        private void pictureBoxRec_KeyUp(object sender, KeyEventArgs e)
+        {
+            Console.WriteLine("key:" + e.KeyValue + "keyvalue:" + e.KeyValue + "keyData:" + e.KeyData);
+            if (isConnect)
+            {
+                try
+                {
+                    byte messageType = (byte)ENUMS.MESSAGETYPE.BOARDKEY_UP;
+                    writer.Write(messageType);
+                    writer.Write((byte)e.KeyCode);
+                    writer.Flush();
+                }
+                catch (Exception se)
+                {
+                    MessageBox.Show(se.Message);
+                    stopClient();
+                }
+            }
+        }
+       
     }
 }

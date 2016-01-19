@@ -159,6 +159,8 @@ namespace ControlServer1._0.DataPacket
             KEY_DOWN = (byte)0x20,
             KEY_UP = (byte)0x21,
 
+            BOARDKEY_DOWN=(byte)0x22,
+            BOARDKEY_UP=(byte)0x23,
 
 
             /**mouse control*/

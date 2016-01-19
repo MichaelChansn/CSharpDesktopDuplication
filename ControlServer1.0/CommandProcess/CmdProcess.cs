@@ -203,7 +203,7 @@ namespace ControlServer1._0.CommandProcess
                     case ENUMS.MESSAGETYPE.MOUSE_LEFT_DOUBLE_CLICK:
                         //双击左键
                         mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-                        Thread.Sleep(200);
+                        Thread.Sleep(100);
                         mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
                         break;
                     case ENUMS.MESSAGETYPE.MOUSE_LEFT_DOWN:
@@ -218,12 +218,15 @@ namespace ControlServer1._0.CommandProcess
                         mouse_event(MOUSEEVENTF_MOVE, xdis, ydis, 0, 0);
                         break;
                     case ENUMS.MESSAGETYPE.MOUSE_RIGHT_CLICK:
-                        mouse_event(MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
+                        mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
+                        Thread.Sleep(100);
+                        mouse_event( MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
+                        
                         break;
                     case ENUMS.MESSAGETYPE.MOUSE_RIGHT_DOUBLE_CLICK:
                         //双击右键
                         mouse_event(MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
-                        Thread.Sleep(200);
+                        Thread.Sleep(100);
                         mouse_event(MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
                         break;
                     case ENUMS.MESSAGETYPE.MOUSE_RIGHT_DOWN:
@@ -252,6 +255,14 @@ namespace ControlServer1._0.CommandProcess
                         int textLen = big2Small(reader.ReadInt32());
                         byte[] textByte = reader.ReadBytes(textLen);
                         SendKeys.SendWait(Encoding.UTF8.GetString(textByte));
+                        break;
+                    case ENUMS.MESSAGETYPE.BOARDKEY_DOWN:
+                        byte keyDown = reader.ReadByte();
+                        keybd_event(keyDown, MapVirtualKey(keyDown, 0), KEYEVENTF_EXTENDEDKEY | 0, 0);
+                        break;
+                    case ENUMS.MESSAGETYPE.BOARDKEY_UP:
+                        byte keyUp = reader.ReadByte();
+                        keybd_event(keyUp, MapVirtualKey(keyUp, 0), KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
                         break;
                 }
             }
