@@ -35,6 +35,11 @@ namespace ControlClient1._0.ErrorMessage
                     try
                     {
                         FileStream fs = new FileStream(errorOutputFilePath, FileMode.Append);
+                        if (fs.Length > 1024 * 1024)
+                        {
+                            fs.Close();
+                            fs = new FileStream(errorOutputFilePath, FileMode.Create);
+                        }
                         StreamWriter sw = new StreamWriter(fs, Encoding.Default);
                         sw.Write(DateTime.Now.ToLocalTime()+":"+message);
                         sw.WriteLine();
