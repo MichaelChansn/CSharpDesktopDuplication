@@ -164,7 +164,7 @@ namespace DesktopDuplication
                 if (ex.ResultCode.Failure)
                 {
                     //return true;
-                    ReleaseFrame();
+                    desktopResource.Dispose();
                     throw new DesktopDuplicationException("Failed to acquire next frame.");
                 }
             }

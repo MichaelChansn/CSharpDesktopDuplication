@@ -489,7 +489,7 @@ namespace ControlClient1._0
             {
                 try
                 {
-                    byte messageType = (byte)0x10;
+                    byte messageType = (byte)ENUMS.MESSAGETYPE.START_PIC;
                     writer.Write(messageType);
                     writer.Flush();
                 }
@@ -507,7 +507,7 @@ namespace ControlClient1._0
             {
                 try
                 {
-                    byte messageType = (byte)0x11;
+                    byte messageType = (byte)ENUMS.MESSAGETYPE.STOP_PIC;
                     writer.Write(messageType);
                     writer.Flush();
                 }
